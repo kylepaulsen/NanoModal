@@ -62,6 +62,10 @@ function El(tag, classNames) {
         el.parentNode.removeChild(el);
     }
 
+    function add(elObject) {
+        el.appendChild(elObject.el);
+    }
+
     function addToBody() {
         document.body.appendChild(el);
     }
@@ -75,6 +79,7 @@ function El(tag, classNames) {
         isShowing: isShowing,
         setStyle: setStyle,
         remove: remove,
+        add: add,
         addToBody: addToBody
     };
 }

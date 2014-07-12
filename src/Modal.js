@@ -4,22 +4,31 @@ var ModalEvent = require("./ModalEvent");
 
 function Modal(options) {
     var modal = El("div", "nanoModal nanoModalOverride");
+    var content = El("div", "nanoModalContent");
+    var buttonArea = El("div", "nanoModalButtons");
+    modal.add(content);
+    modal.add(buttonArea);
+
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
 
     if (typeof options === "undefined") {
         return;
     }
-    if (typeof options.content === "undefined") {
+    if (options.content === undefined) {
         var text = options;
         options = {
             content: text
         };
     }
     if (options.content instanceof Node) {
-        modal.el.appendChild(options.content);
+        content.el.appendChild(options.content);
     } else {
-        modal.el.innerHTML = options.content;
+        content.el.innerHTML = options.content;
+    }
+
+    if (options.buttons === undefined) {
+        options.buttons = [{text: "Close", handler: "hide", primary: true}];
     }
 
     var show = function() {
@@ -49,6 +58,33 @@ function Modal(options) {
         onShowEvent.removeAllListeners();
         onHideEvent.removeAllListeners();
     };
+
+    (function addButtons() {
+        var btnIdx = options.buttons.length;
+        var btnObj;
+        var btnEl;
+        var classes;
+
+        if (btnIdx === 0) {
+            buttonArea.remove();
+        } else {
+            while (btnIdx-- > 0) {
+                btnObj = options.buttons[btnIdx];
+                classes = "nanoModalBtn";
+                if (btnObj.primary) {
+                    classes += " nanoModalBtnPrimary";
+                }
+                btnEl = El("button", classes);
+                if (btnObj.handler === "hide") {
+                    btnEl.addClickListener(hide);
+                } else if (btnObj.handler) {
+                    btnEl.addClickListener(btnObj.handler);
+                }
+                btnEl.el.innerText = btnObj.text;
+                buttonArea.add(btnEl);
+            }
+        }
+    })();
 
     modal.addToBody();
 

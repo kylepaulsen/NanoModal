@@ -63,6 +63,10 @@ function El(tag, classNames) {
         el.parentNode.removeChild(el);
     }
 
+    function add(elObject) {
+        el.appendChild(elObject.el);
+    }
+
     function addToBody() {
         document.body.appendChild(el);
     }
@@ -76,6 +80,7 @@ function El(tag, classNames) {
         isShowing: isShowing,
         setStyle: setStyle,
         remove: remove,
+        add: add,
         addToBody: addToBody
     };
 }
@@ -89,22 +94,31 @@ var ModalEvent = require("./ModalEvent");
 
 function Modal(options) {
     var modal = El("div", "nanoModal nanoModalOverride");
+    var content = El("div", "nanoModalContent");
+    var buttonArea = El("div", "nanoModalButtons");
+    modal.add(content);
+    modal.add(buttonArea);
+
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
 
     if (typeof options === "undefined") {
         return;
     }
-    if (typeof options.content === "undefined") {
+    if (options.content === undefined) {
         var text = options;
         options = {
             content: text
         };
     }
     if (options.content instanceof Node) {
-        modal.appendChild(options.content);
+        content.el.appendChild(options.content);
     } else {
-        modal.el.innerHTML = options.content;
+        content.el.innerHTML = options.content;
+    }
+
+    if (options.buttons === undefined) {
+        options.buttons = [{text: "Close", handler: "hide", primary: true}];
     }
 
     var show = function() {
@@ -134,6 +148,33 @@ function Modal(options) {
         onShowEvent.removeAllListeners();
         onHideEvent.removeAllListeners();
     };
+
+    (function addButtons() {
+        var btnIdx = options.buttons.length;
+        var btnObj;
+        var btnEl;
+        var classes;
+
+        if (btnIdx === 0) {
+            buttonArea.remove();
+        } else {
+            while (btnIdx-- > 0) {
+                btnObj = options.buttons[btnIdx];
+                classes = "nanoModalBtn";
+                if (btnObj.primary) {
+                    classes += " nanoModalBtnPrimary";
+                }
+                btnEl = El("button", classes);
+                if (btnObj.handler === "hide") {
+                    btnEl.addClickListener(hide);
+                } else if (btnObj.handler) {
+                    btnEl.addClickListener(btnObj.handler);
+                }
+                btnEl.el.innerText = btnObj.text;
+                buttonArea.add(btnEl);
+            }
+        }
+    })();
 
     modal.addToBody();
 
@@ -202,7 +243,7 @@ var nanoModal = (function() {
         if (get(".nanoModalOverlay").length === 0) {
             // Put the main styles on the page.
             var style = El("style");
-            style.el.innerText = ".nanoModal{position:absolute;top:100px;left:50%;display:none;z-index:9999;min-width:300px;padding:10px 20px;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:#fff;background:-moz-linear-gradient(top,#fff 0,#ddd 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd));background:-webkit-linear-gradient(top,#fff 0,#ddd 100%);background:-o-linear-gradient(top,#fff 0,#ddd 100%);background:-ms-linear-gradient(top,#fff 0,#ddd 100%);background:linear-gradient(to bottom,#fff 0,#ddd 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#ddd', GradientType=0)}.nanoModalOverlay{position:fixed;top:0;left:0;width:100%;height:100%;opacity:.5;z-index:9998;background:#000;display:none}";
+            style.el.innerText = ".nanoModal{position:absolute;top:100px;left:50%;display:none;z-index:9999;min-width:300px;padding:15px 20px 10px;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:#fff;background:-moz-linear-gradient(top,#fff 0,#ddd 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd));background:-webkit-linear-gradient(top,#fff 0,#ddd 100%);background:-o-linear-gradient(top,#fff 0,#ddd 100%);background:-ms-linear-gradient(top,#fff 0,#ddd 100%);background:linear-gradient(to bottom,#fff 0,#ddd 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#ddd', GradientType=0)}.nanoModalOverlay{position:fixed;top:0;left:0;width:100%;height:100%;opacity:.5;z-index:9998;background:#000;display:none}.nanoModalButtons{border-top:1px solid #ddd;margin-top:15px;text-align:right}.nanoModalBtn{color:#333;background-color:#fff;display:inline-block;padding:6px 12px;margin:8px 4px 0;font-size:14px;text-align:center;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}.nanoModalBtn:active,.nanoModalBtn:focus,.nanoModalBtn:hover{color:#333;background-color:#e6e6e6;border-color:#adadad}.nanoModalBtn.nanoModalBtnPrimary{color:#fff;background-color:#428bca;border-color:#357ebd}.nanoModalBtn.nanoModalBtnPrimary:active,.nanoModalBtn.nanoModalBtnPrimary:focus,.nanoModalBtn.nanoModalBtnPrimary:hover{color:#fff;background-color:#3071a9;border-color:#285e8e}";
             var firstElInHead = get("head")[0].childNodes[0];
             firstElInHead.parentNode.insertBefore(style.el, firstElInHead);
 

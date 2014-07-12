@@ -3,12 +3,73 @@
         <title>NanoModal Example Page</title>
     </head>
     <body>
-        <button onclick="openModal()">Open</button>
+        <button onclick="openModal1()">Open Modal 1</button>
+        <button onclick="openModal2()">Open Modal 2</button>
+        <button onclick="openModal3()">Open Modal 3</button>
+        <button onclick="openModal4()">Open Modal 4</button>
+
+        <div id="hiddenModals" style="position: absolute; top: -9999px;">
+            <div id="modal3">
+                <h3>This is the ULTIMATE modal!</h3>
+                <p>This is some info about this modal</p>
+                <br>
+                Enter your name: <input id="name" type="text">
+            </div>
+        </div>
+
         <script type="text/javascript" src="NanoModal.js"></script>
         <script type="text/javascript">
-            var modal = nanoModal("Test Content")
-            function openModal() {
-                modal.show();
+            var modal1 = nanoModal("Test Content");
+            var modal2 = nanoModal({
+                content: "Click outside the modal to close.",
+                buttons: []
+            });
+            var modal3 = nanoModal({
+                content: "This is super test content.",
+                overlayClose: false,
+                buttons: [{
+                    text: "OK",
+                    handler: "hide",
+                    primary: true
+                }, {
+                    text: "Cancel",
+                    handler: function(){
+                        alert("Can't Cancel!!! >:(");
+                    }
+                }]
+            });
+            var modal4 = nanoModal({
+                content: document.getElementById("modal3"),
+                overlayClose: false,
+                buttons: [{
+                    text: "WHOA DUDE!",
+                    handler: function() {
+                        var name = document.getElementById("name").value;
+                        if (name.length < 1) {
+                            alert("NO! Enter your name NOW!");
+                        } else {
+                            modal4.hide();
+                            alert("Well hello there, " + name);
+                        }
+                    },
+                    primary: true
+                }]
+            });
+
+            function openModal1() {
+                modal1.show();
+            }
+
+            function openModal2() {
+                modal2.show();
+            }
+
+            function openModal3() {
+                modal3.show();
+            }
+
+            function openModal4() {
+                modal4.show();
             }
         </script>
     </body>
