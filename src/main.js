@@ -4,13 +4,27 @@ var nanoModal = (function() {
 
     var El = require("./El");
     var Modal = require("./Modal");
+    var ModalStack = require("./ModalStack");
 
     var overlay;
     var overlayClose = true;
+    var modalsContainer;
+
+    var modalId = 0;
+    var modalStack = ModalStack();
 
     // HELPERS ==========
     var get = function(qry) {
         return document.querySelectorAll(qry);
+    };
+
+    var setOverlayClose = function() {
+        var options = modalStack.top().options;
+        if (options.overlayClose === false) {
+            overlayClose = false;
+        } else {
+            overlayClose = true;
+        }
     };
 
     (function init() {
@@ -25,36 +39,44 @@ var nanoModal = (function() {
             overlay = El("div", "nanoModalOverlay nanoModalOverride");
             overlay.addClickListener(function() {
                 if (overlayClose) {
-                    overlay.hide();
-                    var modals = get(".nanoModal");
-                    var t = modals.length;
-                    while (t-- > 0) {
-                        modals[t].style.display = "none";
+                    if (modalStack.stack.length === 1) {
+                        overlay.hide();
                     }
+                    modalStack.top().hide();
                 }
             });
             overlay.addToBody(overlay);
+
+            modalsContainer = El("div");
+            modalsContainer.el.id = "nanoModalsContainer";
+            modalsContainer.addToBody();
         }
     })();
 
     return function(options) {
-        var modal = Modal(options);
+        var modalObj = Modal(options);
 
-        if (modal) {
-            modal.onShow(function() {
+        if (modalObj) {
+            modalObj.modal.el.id = "nanoModal-" + (modalId++);
+            modalObj.onShow(function() {
                 overlay.show();
-                if (options.overlayClose === false) {
-                    overlayClose = false;
+                modalStack.push(modalObj);
+                setOverlayClose();
+            });
+
+            modalObj.onHide(function() {
+                modalStack.pop();
+                if (options.autoRemove) {
+                    modalObj.remove();
+                }
+                if (modalStack.stack.length === 0) {
+                    overlay.hide();
                 } else {
-                    overlayClose = true;
+                    setOverlayClose();
                 }
             });
 
-            modal.onHide(function() {
-                overlay.hide();
-            });
-
-            return modal;
+            return modalObj;
         }
     };
 })();

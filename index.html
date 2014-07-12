@@ -34,7 +34,7 @@
                 }, {
                     text: "Cancel",
                     handler: function(){
-                        alert("Can't Cancel!!! >:(");
+                        nanoModal({content: "Can't Cancel!!! >:(", autoRemove: true}).show();
                     }
                 }]
             });
@@ -46,10 +46,10 @@
                     handler: function() {
                         var name = document.getElementById("name").value;
                         if (name.length < 1) {
-                            alert("NO! Enter your name NOW!");
+                             nanoModal({content: "NO! Enter your name NOW!", autoRemove: true}).show();
                         } else {
                             modal4.hide();
-                            alert("Well hello there, " + name);
+                             nanoModal({content: "Well hello there, " + name, autoRemove: true}).show();
                         }
                     },
                     primary: true

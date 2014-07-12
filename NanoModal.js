@@ -99,6 +99,8 @@ function Modal(options) {
     modal.add(content);
     modal.add(buttonArea);
 
+    var modalsContainer = document.getElementById("nanoModalsContainer");
+
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
 
@@ -111,17 +113,23 @@ function Modal(options) {
             content: text
         };
     }
-    if (options.content instanceof Node) {
-        content.el.appendChild(options.content);
-    } else {
-        content.el.innerHTML = options.content;
-    }
+
+    var setContent = function(newContent) {
+        if (newContent instanceof Node) {
+            content.el.innerHTML = "";
+            content.el.appendChild(newContent);
+        } else {
+            content.el.innerHTML = newContent;
+        }
+    };
+    setContent(options.content);
 
     if (options.buttons === undefined) {
         options.buttons = [{text: "Close", handler: "hide", primary: true}];
     }
 
     var show = function() {
+        modalsContainer.appendChild(modal.el);
         modal.show();
         modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
         onShowEvent.fire();
@@ -149,17 +157,19 @@ function Modal(options) {
         onHideEvent.removeAllListeners();
     };
 
-    (function addButtons() {
-        var btnIdx = options.buttons.length;
+    var setButtons = function(buttonList) {
+        var btnIdx = buttonList.length;
         var btnObj;
         var btnEl;
         var classes;
+        buttonArea.el.innerHTML = "";
 
         if (btnIdx === 0) {
-            buttonArea.remove();
+            buttonArea.hide();
         } else {
+            buttonArea.show();
             while (btnIdx-- > 0) {
-                btnObj = options.buttons[btnIdx];
+                btnObj = buttonList[btnIdx];
                 classes = "nanoModalBtn";
                 if (btnObj.primary) {
                     classes += " nanoModalBtnPrimary";
@@ -174,17 +184,21 @@ function Modal(options) {
                 buttonArea.add(btnEl);
             }
         }
-    })();
+    };
+    setButtons(options.buttons);
 
-    modal.addToBody();
+    modalsContainer.appendChild(modal.el);
 
     return {
         modal: modal,
+        options: options,
         show: show,
         hide: hide,
         onShow: onShow,
         onHide: onHide,
-        remove: remove
+        remove: remove,
+        setButtons: setButtons,
+        setContent: setContent
     };
 }
 
@@ -224,19 +238,76 @@ function ModalEvent() {
 module.exports = ModalEvent;
 
 },{}],4:[function(require,module,exports){
+function ModalStack() {
+    var stack = [];
+
+    var get = function(id) {
+        return document.getElementById(id);
+    };
+
+    var top = function() {
+        return stack[stack.length - 1];
+    };
+
+    var push = function(modal) {
+        if (stack.length > 0) {
+            var el = get(top().modal.el.id);
+            if (el) {
+                el.style.zIndex = 9997;
+            }
+        }
+        stack.push(modal);
+    };
+
+    var pop = function() {
+        var obj = stack.pop();
+        if (stack.length > 0) {
+            var el = get(top().modal.el.id);
+            if (el) {
+                el.style.zIndex = 9999;
+            }
+        }
+        return obj;
+    };
+
+    return {
+        stack: stack,
+        push: push,
+        pop: pop,
+        top: top
+    };
+}
+
+module.exports = ModalStack;
+
+},{}],5:[function(require,module,exports){
 var nanoModal = (function() {
 
     
 
     var El = require("./El");
     var Modal = require("./Modal");
+    var ModalStack = require("./ModalStack");
 
     var overlay;
     var overlayClose = true;
+    var modalsContainer;
+
+    var modalId = 0;
+    var modalStack = ModalStack();
 
     // HELPERS ==========
     var get = function(qry) {
         return document.querySelectorAll(qry);
+    };
+
+    var setOverlayClose = function() {
+        var options = modalStack.top().options;
+        if (options.overlayClose === false) {
+            overlayClose = false;
+        } else {
+            overlayClose = true;
+        }
     };
 
     (function init() {
@@ -251,36 +322,44 @@ var nanoModal = (function() {
             overlay = El("div", "nanoModalOverlay nanoModalOverride");
             overlay.addClickListener(function() {
                 if (overlayClose) {
-                    overlay.hide();
-                    var modals = get(".nanoModal");
-                    var t = modals.length;
-                    while (t-- > 0) {
-                        modals[t].style.display = "none";
+                    if (modalStack.stack.length === 1) {
+                        overlay.hide();
                     }
+                    modalStack.top().hide();
                 }
             });
             overlay.addToBody(overlay);
+
+            modalsContainer = El("div");
+            modalsContainer.el.id = "nanoModalsContainer";
+            modalsContainer.addToBody();
         }
     })();
 
     return function(options) {
-        var modal = Modal(options);
+        var modalObj = Modal(options);
 
-        if (modal) {
-            modal.onShow(function() {
+        if (modalObj) {
+            modalObj.modal.el.id = "nanoModal-" + (modalId++);
+            modalObj.onShow(function() {
                 overlay.show();
-                if (options.overlayClose === false) {
-                    overlayClose = false;
+                modalStack.push(modalObj);
+                setOverlayClose();
+            });
+
+            modalObj.onHide(function() {
+                modalStack.pop();
+                if (options.autoRemove) {
+                    modalObj.remove();
+                }
+                if (modalStack.stack.length === 0) {
+                    overlay.hide();
                 } else {
-                    overlayClose = true;
+                    setOverlayClose();
                 }
             });
 
-            modal.onHide(function() {
-                overlay.hide();
-            });
-
-            return modal;
+            return modalObj;
         }
     };
 })();
@@ -297,4 +376,4 @@ if (typeof module !== "undefined") {
     module.exports = nanoModal;
 }
 
-},{"./El":1,"./Modal":2}]},{},[1,2,3,4]);
+},{"./El":1,"./Modal":2,"./ModalStack":4}]},{},[1,2,3,4,5]);

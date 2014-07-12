@@ -9,6 +9,8 @@ function Modal(options) {
     modal.add(content);
     modal.add(buttonArea);
 
+    var modalsContainer = document.getElementById("nanoModalsContainer");
+
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
 
@@ -21,17 +23,23 @@ function Modal(options) {
             content: text
         };
     }
-    if (options.content instanceof Node) {
-        content.el.appendChild(options.content);
-    } else {
-        content.el.innerHTML = options.content;
-    }
+
+    var setContent = function(newContent) {
+        if (newContent instanceof Node) {
+            content.el.innerHTML = "";
+            content.el.appendChild(newContent);
+        } else {
+            content.el.innerHTML = newContent;
+        }
+    };
+    setContent(options.content);
 
     if (options.buttons === undefined) {
         options.buttons = [{text: "Close", handler: "hide", primary: true}];
     }
 
     var show = function() {
+        modalsContainer.appendChild(modal.el);
         modal.show();
         modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
         onShowEvent.fire();
@@ -59,17 +67,19 @@ function Modal(options) {
         onHideEvent.removeAllListeners();
     };
 
-    (function addButtons() {
-        var btnIdx = options.buttons.length;
+    var setButtons = function(buttonList) {
+        var btnIdx = buttonList.length;
         var btnObj;
         var btnEl;
         var classes;
+        buttonArea.el.innerHTML = "";
 
         if (btnIdx === 0) {
-            buttonArea.remove();
+            buttonArea.hide();
         } else {
+            buttonArea.show();
             while (btnIdx-- > 0) {
-                btnObj = options.buttons[btnIdx];
+                btnObj = buttonList[btnIdx];
                 classes = "nanoModalBtn";
                 if (btnObj.primary) {
                     classes += " nanoModalBtnPrimary";
@@ -84,17 +94,21 @@ function Modal(options) {
                 buttonArea.add(btnEl);
             }
         }
-    })();
+    };
+    setButtons(options.buttons);
 
-    modal.addToBody();
+    modalsContainer.appendChild(modal.el);
 
     return {
         modal: modal,
+        options: options,
         show: show,
         hide: hide,
         onShow: onShow,
         onHide: onHide,
-        remove: remove
+        remove: remove,
+        setButtons: setButtons,
+        setContent: setContent
     };
 }
 
