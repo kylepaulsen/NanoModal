@@ -1,0 +1,3 @@
+function Modal(options) {
+
+}

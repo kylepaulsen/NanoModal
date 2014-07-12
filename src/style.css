@@ -1,0 +1,33 @@
+.nanoModal {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    display: none;
+    background: #fff;
+    z-index: 9999;
+    min-width: 300px;
+    padding: 10px 20px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    background: #fff; /* Old browsers */
+    background: -moz-linear-gradient(top, #fff 0%, #ddd 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fff), color-stop(100%,#ddd)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #fff 0%,#ddd 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #fff 0%,#ddd 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #fff 0%,#ddd 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #fff 0%,#ddd 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fff', endColorstr='#ddd',GradientType=0 ); /* IE6-9 */
+}
+
+.nanoModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+    z-index: 9998;
+    background: #000;
+    display: none;
+}
