@@ -3,22 +3,15 @@ var nanoModal = (function() {
     var fs = require("fs");
 
     var El = require("./El");
+    var Modal = require("./Modal");
 
     var overlay;
-    var modals = [];
+    var overlayClose = true;
 
     // HELPERS ==========
     var get = function(qry) {
         return document.querySelectorAll(qry);
     };
-
-    // PRIVATE FUNCTIONS ======
-    function hideAllModals() {
-        var x = modals.length;
-        while (x-- > 0) {
-            modals[x].hide();
-        }
-    }
 
     (function init() {
         if (get(".nanoModalOverlay").length === 0) {
@@ -31,57 +24,38 @@ var nanoModal = (function() {
             // Make the overlay and put it on the page.
             overlay = El("div", "nanoModalOverlay nanoModalOverride");
             overlay.addClickListener(function() {
-                overlay.hide();
-                hideAllModals();
+                if (overlayClose) {
+                    overlay.hide();
+                    var modals = get(".nanoModal");
+                    var t = modals.length;
+                    while (t-- > 0) {
+                        modals[t].style.display = "none";
+                    }
+                }
             });
             overlay.addToBody(overlay);
         }
     })();
 
     return function(options) {
-        var modal = El("div", "nanoModal nanoModalOverride");
-        if (typeof options === "undefined") {
-            return;
-        }
-        if (typeof options.content === "undefined") {
-            var text = options;
-            options = {
-                content: text
-            };
-        }
-        if (options.content instanceof Node) {
-            modal.appendChild(options.content);
-        } else {
-            modal.el.innerHTML = options.content;
-        }
+        var modal = Modal(options);
 
-        var show = function() {
-            hideAllModals();
-            modal.show();
-            modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
-            overlay.show();
-        };
+        if (modal) {
+            modal.onShow(function() {
+                overlay.show();
+                if (options.overlayClose === false) {
+                    overlayClose = false;
+                } else {
+                    overlayClose = true;
+                }
+            });
 
-        var hide = function() {
-            if (modal.isShowing()) {
-                hideAllModals();
+            modal.onHide(function() {
                 overlay.hide();
-            }
-        };
+            });
 
-        var destroy = function() {
-            hide();
-            modal.destroy();
-        };
-
-        modals.push(modal);
-        modal.addToBody();
-
-        return {
-            show: show,
-            hide: hide,
-            destroy: destroy
-        };
+            return modal;
+        }
     };
 })();
 

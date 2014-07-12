@@ -33,7 +33,7 @@ module.exports = function(grunt) {
                     sourceField: "form.js_code"
                 },
                 files: {
-                    "nanoModal.min.js": "nanoModal.js"
+                    "<%= pkg.name %>.min.js": "<%= pkg.name %>.js"
                 }
             }
         }
@@ -47,5 +47,5 @@ module.exports = function(grunt) {
     // grunt.registerTask("test", ["jshint", "qunit"]);
 
     // grunt.registerTask("default", ["http:closure"]);
-    grunt.registerTask("default", ["cssmin", "browserify"]);
+    grunt.registerTask("default", ["cssmin", "browserify", "http:closure"]);
 };

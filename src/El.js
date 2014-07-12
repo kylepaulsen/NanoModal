@@ -31,22 +31,28 @@ function El(tag, classNames) {
     }
 
     function show() {
-        el.style.display = "block";
+        if (el) {
+            el.style.display = "block";
+        }
     }
 
     function hide() {
-        el.style.display = "none";
+        if (el) {
+            el.style.display = "none";
+        }
     }
 
     function isShowing() {
-        return el.style.display === "block";
+        return el && el.style.display === "block";
     }
 
     function setStyle(style, value) {
-        el.style[style] = value;
+        if (el) {
+            el.style[style] = value;
+        }
     }
 
-    function destroy() {
+    function remove() {
         var x = eventHandlers.length;
         var eventHandler;
         while (x-- > 0) {
@@ -54,7 +60,6 @@ function El(tag, classNames) {
             removeListener(eventHandler.event, eventHandler.handler);
         }
         el.parentNode.removeChild(el);
-        el = null;
     }
 
     function addToBody() {
@@ -69,7 +74,7 @@ function El(tag, classNames) {
         hide: hide,
         isShowing: isShowing,
         setStyle: setStyle,
-        destroy: destroy,
+        remove: remove,
         addToBody: addToBody
     };
 }
