@@ -1,6 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 function El(tag, classNames) {
-    var el = document.createElement(tag);
+    var doc = document;
+    var el = doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;
@@ -23,6 +24,15 @@ function El(tag, classNames) {
             el.removeEventListener(event, handler);
         } else {
             el.detachEvent("on" + event, handler);
+        }
+        var t = eventHandlers.length;
+        var handlerObj;
+        while (t-- > 0) {
+            handlerObj = eventHandlers[t];
+            if (handlerObj.event === event && handlerObj.handler === handler) {
+                eventHandlers.splice(t, 1);
+                break;
+            }
         }
     }
 
@@ -53,6 +63,19 @@ function El(tag, classNames) {
         }
     }
 
+    function html(html) {
+        if (el) {
+            el.innerHTML = html;
+        }
+    }
+
+    function text(text) {
+        if (el) {
+            html("");
+            el.appendChild(doc.createTextNode(text));
+        }
+    }
+
     function remove() {
         var x = eventHandlers.length;
         var eventHandler;
@@ -68,7 +91,7 @@ function El(tag, classNames) {
     }
 
     function addToBody() {
-        document.body.appendChild(el);
+        doc.body.appendChild(el);
     }
 
     return {
@@ -79,6 +102,8 @@ function El(tag, classNames) {
         hide: hide,
         isShowing: isShowing,
         setStyle: setStyle,
+        html: html,
+        text: text,
         remove: remove,
         add: add,
         addToBody: addToBody
@@ -99,6 +124,7 @@ function Modal(options) {
     modal.add(content);
     modal.add(buttonArea);
 
+    var buttons = [];
     var modalsContainer = document.getElementById("nanoModalsContainer");
 
     var onShowEvent = ModalEvent();
@@ -115,11 +141,12 @@ function Modal(options) {
     }
 
     var setContent = function(newContent) {
-        if (newContent instanceof Node) {
-            content.el.innerHTML = "";
+        // Only good way of checking if a node in IE8...
+        if (newContent.nodeType) {
+            content.html("");
             content.el.appendChild(newContent);
         } else {
-            content.el.innerHTML = newContent;
+            content.html(newContent);
         }
     };
     setContent(options.content);
@@ -150,8 +177,18 @@ function Modal(options) {
         onHideEvent.addListener(callback);
     };
 
+    var removeButtons = function() {
+        var t = buttons.length;
+        while (t-- > 0) {
+            var button = buttons[t];
+            button.remove();
+        }
+        buttons = [];
+    };
+
     var remove = function() {
         hide();
+        removeButtons();
         modal.remove();
         onShowEvent.removeAllListeners();
         onHideEvent.removeAllListeners();
@@ -162,7 +199,8 @@ function Modal(options) {
         var btnObj;
         var btnEl;
         var classes;
-        buttonArea.el.innerHTML = "";
+
+        removeButtons();
 
         if (btnIdx === 0) {
             buttonArea.hide();
@@ -180,8 +218,9 @@ function Modal(options) {
                 } else if (btnObj.handler) {
                     btnEl.addClickListener(btnObj.handler);
                 }
-                btnEl.el.innerText = btnObj.text;
+                btnEl.text(btnObj.text);
                 buttonArea.add(btnEl);
+                buttons.push(btnEl);
             }
         }
     };
@@ -314,9 +353,15 @@ var nanoModal = (function() {
         if (get(".nanoModalOverlay").length === 0) {
             // Put the main styles on the page.
             var style = El("style");
-            style.el.innerText = ".nanoModal{position:absolute;top:100px;left:50%;display:none;z-index:9999;min-width:300px;padding:15px 20px 10px;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:#fff;background:-moz-linear-gradient(top,#fff 0,#ddd 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd));background:-webkit-linear-gradient(top,#fff 0,#ddd 100%);background:-o-linear-gradient(top,#fff 0,#ddd 100%);background:-ms-linear-gradient(top,#fff 0,#ddd 100%);background:linear-gradient(to bottom,#fff 0,#ddd 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff', endColorstr='#ddd', GradientType=0)}.nanoModalOverlay{position:fixed;top:0;left:0;width:100%;height:100%;opacity:.5;z-index:9998;background:#000;display:none}.nanoModalButtons{border-top:1px solid #ddd;margin-top:15px;text-align:right}.nanoModalBtn{color:#333;background-color:#fff;display:inline-block;padding:6px 12px;margin:8px 4px 0;font-size:14px;text-align:center;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}.nanoModalBtn:active,.nanoModalBtn:focus,.nanoModalBtn:hover{color:#333;background-color:#e6e6e6;border-color:#adadad}.nanoModalBtn.nanoModalBtnPrimary{color:#fff;background-color:#428bca;border-color:#357ebd}.nanoModalBtn.nanoModalBtnPrimary:active,.nanoModalBtn.nanoModalBtnPrimary:focus,.nanoModalBtn.nanoModalBtnPrimary:hover{color:#fff;background-color:#3071a9;border-color:#285e8e}";
             var firstElInHead = get("head")[0].childNodes[0];
             firstElInHead.parentNode.insertBefore(style.el, firstElInHead);
+
+            var styleText = ".nanoModal{position:absolute;top:100px;left:50%;display:none;z-index:9999;min-width:300px;padding:15px 20px 10px;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:#fff;background:-moz-linear-gradient(top,#fff 0,#ddd 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd));background:-webkit-linear-gradient(top,#fff 0,#ddd 100%);background:-o-linear-gradient(top,#fff 0,#ddd 100%);background:-ms-linear-gradient(top,#fff 0,#ddd 100%);background:linear-gradient(to bottom,#fff 0,#ddd 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dddddd', GradientType=0)}.nanoModalOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9998;background:#000;display:none;-ms-filter:\"alpha(Opacity=50)\";-moz-opacity:.5;-khtml-opacity:.5;opacity:.5}.nanoModalButtons{border-top:1px solid #ddd;margin-top:15px;text-align:right}.nanoModalBtn{color:#333;background-color:#fff;display:inline-block;padding:6px 12px;margin:8px 4px 0;font-size:14px;text-align:center;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}.nanoModalBtn:active,.nanoModalBtn:focus,.nanoModalBtn:hover{color:#333;background-color:#e6e6e6;border-color:#adadad}.nanoModalBtn.nanoModalBtnPrimary{color:#fff;background-color:#428bca;border-color:#357ebd}.nanoModalBtn.nanoModalBtnPrimary:active,.nanoModalBtn.nanoModalBtnPrimary:focus,.nanoModalBtn.nanoModalBtnPrimary:hover{color:#fff;background-color:#3071a9;border-color:#285e8e}";
+            if (style.el.styleSheet) {
+                style.el.styleSheet.cssText = styleText;
+            } else {
+                style.text(styleText);
+            }
 
             // Make the overlay and put it on the page.
             overlay = El("div", "nanoModalOverlay nanoModalOverride");

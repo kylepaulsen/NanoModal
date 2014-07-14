@@ -9,6 +9,7 @@ function Modal(options) {
     modal.add(content);
     modal.add(buttonArea);
 
+    var buttons = [];
     var modalsContainer = document.getElementById("nanoModalsContainer");
 
     var onShowEvent = ModalEvent();
@@ -25,11 +26,12 @@ function Modal(options) {
     }
 
     var setContent = function(newContent) {
-        if (newContent instanceof Node) {
-            content.el.innerHTML = "";
+        // Only good way of checking if a node in IE8...
+        if (newContent.nodeType) {
+            content.html("");
             content.el.appendChild(newContent);
         } else {
-            content.el.innerHTML = newContent;
+            content.html(newContent);
         }
     };
     setContent(options.content);
@@ -60,8 +62,18 @@ function Modal(options) {
         onHideEvent.addListener(callback);
     };
 
+    var removeButtons = function() {
+        var t = buttons.length;
+        while (t-- > 0) {
+            var button = buttons[t];
+            button.remove();
+        }
+        buttons = [];
+    };
+
     var remove = function() {
         hide();
+        removeButtons();
         modal.remove();
         onShowEvent.removeAllListeners();
         onHideEvent.removeAllListeners();
@@ -72,7 +84,8 @@ function Modal(options) {
         var btnObj;
         var btnEl;
         var classes;
-        buttonArea.el.innerHTML = "";
+
+        removeButtons();
 
         if (btnIdx === 0) {
             buttonArea.hide();
@@ -90,8 +103,9 @@ function Modal(options) {
                 } else if (btnObj.handler) {
                     btnEl.addClickListener(btnObj.handler);
                 }
-                btnEl.el.innerText = btnObj.text;
+                btnEl.text(btnObj.text);
                 buttonArea.add(btnEl);
+                buttons.push(btnEl);
             }
         }
     };

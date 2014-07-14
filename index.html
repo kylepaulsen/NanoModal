@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>NanoModal Example Page</title>
@@ -71,6 +72,70 @@
             function openModal4() {
                 modal4.show();
             }
+
+            var memTestModal1 = nanoModal("HELLO!!!");
+            function memLeakTest1() {
+                var iter = 0;
+                var loop = function() {
+                    if (iter % 2 === 0) {
+                        memTestModal1.show();
+                    } else {
+                        memTestModal1.hide();
+                    }
+                    ++iter;
+                    setTimeout(loop, 10);
+                };
+                loop();
+            }
+            //memLeakTest1();
+
+            function memLeakTest2() {
+                var iter = 0;
+                var loop = function() {
+                    if (iter % 2 === 0) {
+                        memTestModal1 = nanoModal("Hello!! " + iter);
+                    } else {
+                        memTestModal1.remove();
+                    }
+                    ++iter;
+                    setTimeout(loop, 10);
+                };
+                loop();
+            }
+            //memLeakTest2();
+
+            function memLeakTest3() {
+                var iter = 0;
+                var div = document.createElement("div");
+                var b = document.createElement("b");
+                b.innerHTML = "Mem Test 3!!!";
+                div.appendChild(b);
+                document.body.appendChild(div);
+                var loop = function() {
+                    if (iter % 2 === 0) {
+                        memTestModal1 = nanoModal({
+                            content: div,
+                            buttons: [{
+                                text: "OK",
+                                handler: "hide",
+                                primary: true
+                            }, {
+                                text: "Cancel",
+                                handler: function() {
+                                    console.log("ASDFSAFD");
+                                }
+                            }]
+                        });
+                        memTestModal1.show();
+                    } else {
+                        memTestModal1.remove();
+                    }
+                    ++iter;
+                    setTimeout(loop, 10);
+                };
+                loop();
+            }
+            //memLeakTest3();
         </script>
     </body>
 </html>

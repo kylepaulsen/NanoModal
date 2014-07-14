@@ -31,9 +31,15 @@ var nanoModal = (function() {
         if (get(".nanoModalOverlay").length === 0) {
             // Put the main styles on the page.
             var style = El("style");
-            style.el.innerText = fs.readFileSync("src/style.min.css", "utf8");
             var firstElInHead = get("head")[0].childNodes[0];
             firstElInHead.parentNode.insertBefore(style.el, firstElInHead);
+
+            var styleText = fs.readFileSync("src/style.min.css", "utf8");
+            if (style.el.styleSheet) {
+                style.el.styleSheet.cssText = styleText;
+            } else {
+                style.text(styleText);
+            }
 
             // Make the overlay and put it on the page.
             overlay = El("div", "nanoModalOverlay nanoModalOverride");

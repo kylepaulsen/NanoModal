@@ -1,5 +1,6 @@
 function El(tag, classNames) {
-    var el = document.createElement(tag);
+    var doc = document;
+    var el = doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;
@@ -22,6 +23,15 @@ function El(tag, classNames) {
             el.removeEventListener(event, handler);
         } else {
             el.detachEvent("on" + event, handler);
+        }
+        var t = eventHandlers.length;
+        var handlerObj;
+        while (t-- > 0) {
+            handlerObj = eventHandlers[t];
+            if (handlerObj.event === event && handlerObj.handler === handler) {
+                eventHandlers.splice(t, 1);
+                break;
+            }
         }
     }
 
@@ -52,6 +62,19 @@ function El(tag, classNames) {
         }
     }
 
+    function html(html) {
+        if (el) {
+            el.innerHTML = html;
+        }
+    }
+
+    function text(text) {
+        if (el) {
+            html("");
+            el.appendChild(doc.createTextNode(text));
+        }
+    }
+
     function remove() {
         var x = eventHandlers.length;
         var eventHandler;
@@ -67,7 +90,7 @@ function El(tag, classNames) {
     }
 
     function addToBody() {
-        document.body.appendChild(el);
+        doc.body.appendChild(el);
     }
 
     return {
@@ -78,6 +101,8 @@ function El(tag, classNames) {
         hide: hide,
         isShowing: isShowing,
         setStyle: setStyle,
+        html: html,
+        text: text,
         remove: remove,
         add: add,
         addToBody: addToBody
