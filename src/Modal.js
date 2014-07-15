@@ -14,7 +14,7 @@ function Modal(content, options) {
     modal.add(buttonArea);
 
     var buttons = [];
-    var modalsContainer = document.getElementById("nanoModalsContainer");
+    var modalsContainer = El(document.getElementById("nanoModalsContainer"));
 
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
@@ -23,7 +23,7 @@ function Modal(content, options) {
         // Only good way of checking if a node in IE8...
         if (newContent.nodeType) {
             contentContainer.html("");
-            contentContainer.el.appendChild(newContent);
+            contentContainer.add(newContent);
         } else {
             contentContainer.html(newContent);
         }
@@ -37,7 +37,7 @@ function Modal(content, options) {
     }];
 
     var show = function() {
-        modalsContainer.appendChild(modal.el);
+        modalsContainer.add(modal);
         modal.show();
         modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
         onShowEvent.fire();
@@ -107,7 +107,7 @@ function Modal(content, options) {
     };
     setButtons(options.buttons);
 
-    modalsContainer.appendChild(modal.el);
+    modalsContainer.add(modal);
 
     return {
         modal: modal,

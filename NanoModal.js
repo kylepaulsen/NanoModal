@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 function El(tag, classNames) {
     var doc = document;
-    var el = doc.createElement(tag);
+    var el = tag.nodeType || tag === window ? tag : doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;
@@ -87,7 +87,8 @@ function El(tag, classNames) {
     }
 
     function add(elObject) {
-        el.appendChild(elObject.el);
+        var elementToAppend = elObject.el || elObject;
+        el.appendChild(elementToAppend);
     }
 
     function addToBody() {
@@ -129,7 +130,7 @@ function Modal(content, options) {
     modal.add(buttonArea);
 
     var buttons = [];
-    var modalsContainer = document.getElementById("nanoModalsContainer");
+    var modalsContainer = El(document.getElementById("nanoModalsContainer"));
 
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
@@ -138,7 +139,7 @@ function Modal(content, options) {
         // Only good way of checking if a node in IE8...
         if (newContent.nodeType) {
             contentContainer.html("");
-            contentContainer.el.appendChild(newContent);
+            contentContainer.add(newContent);
         } else {
             contentContainer.html(newContent);
         }
@@ -152,7 +153,7 @@ function Modal(content, options) {
     }];
 
     var show = function() {
-        modalsContainer.appendChild(modal.el);
+        modalsContainer.add(modal);
         modal.show();
         modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
         onShowEvent.fire();
@@ -222,7 +223,7 @@ function Modal(content, options) {
     };
     setButtons(options.buttons);
 
-    modalsContainer.appendChild(modal.el);
+    modalsContainer.add(modal);
 
     return {
         modal: modal,
@@ -331,11 +332,6 @@ var nanoModal = (function() {
     var modalId = 0;
     var modalStack = ModalStack();
 
-    // HELPERS ==========
-    var get = function(qry) {
-        return document.querySelectorAll(qry);
-    };
-
     var setOverlayClose = function() {
         var options = modalStack.top().options;
         if (options.overlayClose === false) {
@@ -346,27 +342,37 @@ var nanoModal = (function() {
     };
 
     (function init() {
-        if (get(".nanoModalOverlay").length === 0) {
+        if (document.querySelectorAll(".nanoModalOverlay").length === 0) {
             // Put the main styles on the page.
-            var style = El("style");
-            var firstElInHead = get("head")[0].childNodes[0];
-            firstElInHead.parentNode.insertBefore(style.el, firstElInHead);
+            var styleObj = El("style");
+            var style = styleObj.el;
+            var firstElInHead = document.querySelectorAll("head")[0].childNodes[0];
+            firstElInHead.parentNode.insertBefore(style, firstElInHead);
 
             var styleText = ".nanoModal{position:absolute;top:100px;left:50%;display:none;z-index:9999;min-width:300px;padding:15px 20px 10px;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:#fff;background:-moz-linear-gradient(top,#fff 0,#ddd 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd));background:-webkit-linear-gradient(top,#fff 0,#ddd 100%);background:-o-linear-gradient(top,#fff 0,#ddd 100%);background:-ms-linear-gradient(top,#fff 0,#ddd 100%);background:linear-gradient(to bottom,#fff 0,#ddd 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dddddd', GradientType=0)}.nanoModalOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9998;background:#000;display:none;-ms-filter:\"alpha(Opacity=50)\";-moz-opacity:.5;-khtml-opacity:.5;opacity:.5}.nanoModalButtons{border-top:1px solid #ddd;margin-top:15px;text-align:right}.nanoModalBtn{color:#333;background-color:#fff;display:inline-block;padding:6px 12px;margin:8px 4px 0;font-size:14px;text-align:center;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}.nanoModalBtn:active,.nanoModalBtn:focus,.nanoModalBtn:hover{color:#333;background-color:#e6e6e6;border-color:#adadad}.nanoModalBtn.nanoModalBtnPrimary{color:#fff;background-color:#428bca;border-color:#357ebd}.nanoModalBtn.nanoModalBtnPrimary:active,.nanoModalBtn.nanoModalBtnPrimary:focus,.nanoModalBtn.nanoModalBtnPrimary:hover{color:#fff;background-color:#3071a9;border-color:#285e8e}";
-            if (style.el.styleSheet) {
-                style.el.styleSheet.cssText = styleText;
+            if (style.styleSheet) {
+                style.styleSheet.cssText = styleText;
             } else {
-                style.text(styleText);
+                styleObj.text(styleText);
             }
 
             // Make the overlay and put it on the page.
             overlay = El("div", "nanoModalOverlay nanoModalOverride");
-            overlay.addClickListener(function() {
+            var overlayCloseFunc = function() {
                 if (overlayClose) {
                     if (modalStack.stack.length === 1) {
                         overlay.hide();
                     }
                     modalStack.top().hide();
+                }
+            };
+            overlay.addClickListener(overlayCloseFunc);
+            El(window).addListener("keydown", function(e) {
+                if (modalStack.stack.length) {
+                    var keyCode = (window.event) ? e.which : e.keyCode;
+                    if (keyCode === 27) { // 27 is Escape
+                        overlayCloseFunc();
+                    }
                 }
             });
             overlay.addToBody(overlay);

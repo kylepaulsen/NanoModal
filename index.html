@@ -9,7 +9,7 @@
         <button onclick="openModal3()">Open Modal 3</button>
         <button onclick="openModal4()">Open Modal 4</button>
 
-        <div id="hiddenModals" style="position: absolute; top: -9999px;">
+        <div id="hiddenModals" style="display: none;">
             <div id="modal3">
                 <h3>This is the ULTIMATE modal!</h3>
                 <p>This is some info about this modal</p>
@@ -21,7 +21,7 @@
         <script type="text/javascript" src="NanoModal.js"></script>
         <script type="text/javascript">
             var modal1 = nanoModal("Test Content");
-            var modal2 = nanoModal("Click outside the modal to close.", {
+            var modal2 = nanoModal("Click outside the modal to close or press escape.", {
                 buttons: []
             });
             var modal3 = nanoModal("This is super test content.", {

@@ -13,11 +13,6 @@ var nanoModal = (function() {
     var modalId = 0;
     var modalStack = ModalStack();
 
-    // HELPERS ==========
-    var get = function(qry) {
-        return document.querySelectorAll(qry);
-    };
-
     var setOverlayClose = function() {
         var options = modalStack.top().options;
         if (options.overlayClose === false) {
@@ -28,27 +23,37 @@ var nanoModal = (function() {
     };
 
     (function init() {
-        if (get(".nanoModalOverlay").length === 0) {
+        if (document.querySelectorAll(".nanoModalOverlay").length === 0) {
             // Put the main styles on the page.
-            var style = El("style");
-            var firstElInHead = get("head")[0].childNodes[0];
-            firstElInHead.parentNode.insertBefore(style.el, firstElInHead);
+            var styleObj = El("style");
+            var style = styleObj.el;
+            var firstElInHead = document.querySelectorAll("head")[0].childNodes[0];
+            firstElInHead.parentNode.insertBefore(style, firstElInHead);
 
             var styleText = fs.readFileSync("src/style.min.css", "utf8");
-            if (style.el.styleSheet) {
-                style.el.styleSheet.cssText = styleText;
+            if (style.styleSheet) {
+                style.styleSheet.cssText = styleText;
             } else {
-                style.text(styleText);
+                styleObj.text(styleText);
             }
 
             // Make the overlay and put it on the page.
             overlay = El("div", "nanoModalOverlay nanoModalOverride");
-            overlay.addClickListener(function() {
+            var overlayCloseFunc = function() {
                 if (overlayClose) {
                     if (modalStack.stack.length === 1) {
                         overlay.hide();
                     }
                     modalStack.top().hide();
+                }
+            };
+            overlay.addClickListener(overlayCloseFunc);
+            El(window).addListener("keydown", function(e) {
+                if (modalStack.stack.length) {
+                    var keyCode = (window.event) ? e.which : e.keyCode;
+                    if (keyCode === 27) { // 27 is Escape
+                        overlayCloseFunc();
+                    }
                 }
             });
             overlay.addToBody(overlay);

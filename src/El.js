@@ -1,6 +1,6 @@
 function El(tag, classNames) {
     var doc = document;
-    var el = doc.createElement(tag);
+    var el = tag.nodeType || tag === window ? tag : doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;
@@ -86,7 +86,8 @@ function El(tag, classNames) {
     }
 
     function add(elObject) {
-        el.appendChild(elObject.el);
+        var elementToAppend = elObject.el || elObject;
+        el.appendChild(elementToAppend);
     }
 
     function addToBody() {
