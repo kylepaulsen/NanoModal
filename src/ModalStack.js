@@ -12,20 +12,39 @@ function ModalStack() {
         }
     };
 
+    var getZIndex = function() {
+        var overlay = document.querySelector(".nanoModalOverlay");
+        var currentStyle = overlay.currentStyle;
+        var zIndex = 9998;
+        if (getComputedStyle) {
+            var computed = getComputedStyle(overlay).zIndex;
+            if (!isNaN(parseInt(computed, 10))) {
+                zIndex = computed;
+            }
+        } else {
+            if (currentStyle && !isNaN(parseInt(currentStyle.zIndex, 10))) {
+                zIndex = currentStyle.zIndex;
+            }
+        }
+        return parseInt(zIndex, 10);
+    };
+
+    // public
     var top = function() {
         return stack[stack.length - 1];
     };
 
     var push = function(modalObj) {
+        var zIndex = getZIndex();
         remove(modalObj);
         if (stack.length > 0) {
             var el = top().modal.el;
             if (el) {
-                el.style.zIndex = 9997;
+                el.style.zIndex = zIndex - 1;
             }
         }
         stack.push(modalObj);
-        modalObj.modal.el.style.zIndex = 9999;
+        modalObj.modal.el.style.zIndex = zIndex + 1;
     };
 
     var pop = function() {
@@ -33,7 +52,7 @@ function ModalStack() {
         if (stack.length > 0) {
             var el = top().modal.el;
             if (el) {
-                el.style.zIndex = 9999;
+                el.style.zIndex = getZIndex() + 1;
             }
         }
         return obj;

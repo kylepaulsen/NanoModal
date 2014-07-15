@@ -69,7 +69,6 @@ var nanoModal = (function() {
         var modalObj = Modal(content, options);
 
         if (modalObj) {
-            modalObj.modal.el.id = "nanoModal-" + (modalId++);
             modalObj.onShow(function() {
                 overlay.show();
                 modalStack.push(modalObj);
