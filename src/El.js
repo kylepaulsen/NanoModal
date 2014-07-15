@@ -1,6 +1,6 @@
 function El(tag, classNames) {
     var doc = document;
-    var el = tag.nodeType || tag === window ? tag : doc.createElement(tag);
+    var el = tag.nodeType ? tag : doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;

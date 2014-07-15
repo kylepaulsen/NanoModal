@@ -48,9 +48,9 @@ var nanoModal = (function() {
                 }
             };
             overlay.addClickListener(overlayCloseFunc);
-            El(window).addListener("keydown", function(e) {
+            El(document).addListener("keydown", function(e) {
                 if (modalStack.stack.length) {
-                    var keyCode = (window.event) ? e.which : e.keyCode;
+                    var keyCode = e.which || e.keyCode;
                     if (keyCode === 27) { // 27 is Escape
                         overlayCloseFunc();
                     }

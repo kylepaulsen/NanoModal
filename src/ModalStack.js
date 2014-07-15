@@ -16,7 +16,7 @@ function ModalStack() {
         var overlay = document.querySelector(".nanoModalOverlay");
         var currentStyle = overlay.currentStyle;
         var zIndex = 9998;
-        if (getComputedStyle) {
+        if (window.getComputedStyle) {
             var computed = getComputedStyle(overlay).zIndex;
             if (!isNaN(parseInt(computed, 10))) {
                 zIndex = computed;
