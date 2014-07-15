@@ -25,39 +25,6 @@ function Modal(content, options) {
         primary: true
     }];
 
-    var setContent = function(newContent) {
-        // Only good way of checking if a node in IE8...
-        if (newContent.nodeType) {
-            contentContainer.html("");
-            contentContainer.add(newContent);
-        } else {
-            contentContainer.html(newContent);
-        }
-    };
-    setContent(content);
-
-    var show = function() {
-        modalsContainer.add(modal);
-        modal.show();
-        modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
-        onShowEvent.fire();
-    };
-
-    var hide = function() {
-        if (modal.isShowing()) {
-            modal.hide();
-            onHideEvent.fire();
-        }
-    };
-
-    var onShow = function(callback) {
-        onShowEvent.addListener(callback);
-    };
-
-    var onHide = function(callback) {
-        onHideEvent.addListener(callback);
-    };
-
     var removeButtons = function() {
         var t = buttons.length;
         while (t-- > 0) {
@@ -67,60 +34,92 @@ function Modal(content, options) {
         buttons = [];
     };
 
-    var remove = function() {
-        hide();
-        removeButtons();
-        modal.remove();
-        onShowEvent.removeAllListeners();
-        onHideEvent.removeAllListeners();
+    var center = function() {
+        modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
     };
 
-    var setButtons = function(buttonList) {
-        var btnIdx = buttonList.length;
-        var btnObj;
-        var btnEl;
-        var classes;
-
-        removeButtons();
-
-        if (btnIdx === 0) {
-            buttonArea.hide();
-        } else {
-            buttonArea.show();
-            while (btnIdx-- > 0) {
-                btnObj = buttonList[btnIdx];
-                classes = "nanoModalBtn";
-                if (btnObj.primary) {
-                    classes += " nanoModalBtnPrimary";
-                }
-                btnEl = El("button", classes);
-                if (btnObj.handler === "hide") {
-                    btnEl.addClickListener(hide);
-                } else if (btnObj.handler) {
-                    btnEl.addClickListener(btnObj.handler);
-                }
-                btnEl.text(btnObj.text);
-                buttonArea.add(btnEl);
-                buttons.push(btnEl);
+    var pub = {
+        modal: modal,
+        content: content,
+        options: options,
+        show: function() {
+            modalsContainer.add(modal);
+            modal.show();
+            center();
+            onShowEvent.fire(pub);
+            return pub;
+        },
+        hide: function() {
+            if (modal.isShowing()) {
+                modal.hide();
+                onHideEvent.fire(pub);
             }
+            return pub;
+        },
+        onShow: function(callback) {
+            onShowEvent.addListener(callback);
+            return pub;
+        },
+        onHide: function(callback) {
+            onHideEvent.addListener(callback);
+            return pub;
+        },
+        remove: function() {
+            pub.hide();
+            removeButtons();
+            modal.remove();
+            onShowEvent.removeAllListeners();
+            onHideEvent.removeAllListeners();
+        },
+        setButtons: function(buttonList) {
+            var btnIdx = buttonList.length;
+            var btnObj;
+            var btnEl;
+            var classes;
+
+            removeButtons();
+
+            if (btnIdx === 0) {
+                buttonArea.hide();
+            } else {
+                buttonArea.show();
+                while (btnIdx-- > 0) {
+                    btnObj = buttonList[btnIdx];
+                    classes = "nanoModalBtn";
+                    if (btnObj.primary) {
+                        classes += " nanoModalBtnPrimary";
+                    }
+                    btnEl = El("button", classes);
+                    if (btnObj.handler === "hide") {
+                        btnEl.addClickListener(pub.hide);
+                    } else if (btnObj.handler) {
+                        btnEl.addClickListener(btnObj.handler);
+                    }
+                    btnEl.text(btnObj.text);
+                    buttonArea.add(btnEl);
+                    buttons.push(btnEl);
+                }
+            }
+            center();
+            return pub;
+        },
+        setContent: function(newContent) {
+            // Only good way of checking if a node in IE8...
+            if (newContent.nodeType) {
+                contentContainer.html("");
+                contentContainer.add(newContent);
+            } else {
+                contentContainer.html(newContent);
+            }
+            center();
+            return pub;
         }
     };
 
-    setButtons(options.buttons);
-
+    pub.setContent(content).setButtons(options.buttons);
     modalsContainer.add(modal);
 
-    return {
-        modal: modal,
-        options: options,
-        show: show,
-        hide: hide,
-        onShow: onShow,
-        onHide: onHide,
-        remove: remove,
-        setButtons: setButtons,
-        setContent: setContent
-    };
+    return pub;
 }
 
 module.exports = Modal;

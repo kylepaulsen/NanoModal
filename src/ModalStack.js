@@ -1,28 +1,37 @@
 function ModalStack() {
     var stack = [];
 
-    var get = function(id) {
-        return document.getElementById(id);
+    // private
+    var remove = function(modalObj) {
+        var t = stack.length;
+        while (t-- > 0) {
+            if (stack[t] === modalObj) {
+                stack.splice(t, 1);
+                break;
+            }
+        }
     };
 
     var top = function() {
         return stack[stack.length - 1];
     };
 
-    var push = function(modal) {
+    var push = function(modalObj) {
+        remove(modalObj);
         if (stack.length > 0) {
-            var el = get(top().modal.el.id);
+            var el = top().modal.el;
             if (el) {
                 el.style.zIndex = 9997;
             }
         }
-        stack.push(modal);
+        stack.push(modalObj);
+        modalObj.modal.el.style.zIndex = 9999;
     };
 
     var pop = function() {
         var obj = stack.pop();
         if (stack.length > 0) {
-            var el = get(top().modal.el.id);
+            var el = top().modal.el;
             if (el) {
                 el.style.zIndex = 9999;
             }

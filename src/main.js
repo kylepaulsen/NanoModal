@@ -74,9 +74,7 @@ var nanoModal = (function() {
                 overlay.show();
                 modalStack.push(modalObj);
                 setOverlayClose();
-            });
-
-            modalObj.onHide(function() {
+            }).onHide(function() {
                 modalStack.pop();
                 if (options.autoRemove) {
                     modalObj.remove();

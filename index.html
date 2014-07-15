@@ -21,7 +21,7 @@
         <script type="text/javascript" src="NanoModal.js"></script>
         <script type="text/javascript">
             var modal1 = nanoModal("Test Content");
-            var modal2 = nanoModal("Click outside the modal to close or press escape.", {
+            var modal2 = nanoModal("", {
                 buttons: []
             });
             var modal3 = nanoModal("This is super test content.", {
@@ -32,10 +32,15 @@
                     primary: true
                 }, {
                     text: "Cancel",
-                    handler: function(){
+                    handler: function() {
                         nanoModal("Can't Cancel!!! >:(", {autoRemove: true}).show();
                     }
                 }]
+            });
+            var numShown = 0;
+            modal2.onShow(function(modal) {
+                modal.setContent("Click outside the modal to close or press escape.<br>" +
+                    "This Modal has been shown " + (++numShown) + " times.");
             });
             var modal4 = nanoModal(document.getElementById("modal3"), {
                 overlayClose: false,
