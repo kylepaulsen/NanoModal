@@ -117,11 +117,15 @@ module.exports = El;
 var El = require("./El");
 var ModalEvent = require("./ModalEvent");
 
-function Modal(options) {
+function Modal(content, options) {
+    if (content === undefined) {
+        return;
+    }
+    options = options || {};
     var modal = El("div", "nanoModal nanoModalOverride");
-    var content = El("div", "nanoModalContent");
+    var contentContainer = El("div", "nanoModalContent");
     var buttonArea = El("div", "nanoModalButtons");
-    modal.add(content);
+    modal.add(contentContainer);
     modal.add(buttonArea);
 
     var buttons = [];
@@ -130,30 +134,22 @@ function Modal(options) {
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
 
-    if (typeof options === "undefined") {
-        return;
-    }
-    if (options.content === undefined) {
-        var text = options;
-        options = {
-            content: text
-        };
-    }
-
     var setContent = function(newContent) {
         // Only good way of checking if a node in IE8...
         if (newContent.nodeType) {
-            content.html("");
-            content.el.appendChild(newContent);
+            contentContainer.html("");
+            contentContainer.el.appendChild(newContent);
         } else {
-            content.html(newContent);
+            contentContainer.html(newContent);
         }
     };
-    setContent(options.content);
+    setContent(content);
 
-    if (options.buttons === undefined) {
-        options.buttons = [{text: "Close", handler: "hide", primary: true}];
-    }
+    options.buttons = options.buttons || [{
+        text: "Close",
+        handler: "hide",
+        primary: true
+    }];
 
     var show = function() {
         modalsContainer.appendChild(modal.el);
@@ -381,8 +377,9 @@ var nanoModal = (function() {
         }
     })();
 
-    return function(options) {
-        var modalObj = Modal(options);
+    return function(content, options) {
+        options = options || {};
+        var modalObj = Modal(content, options);
 
         if (modalObj) {
             modalObj.modal.el.id = "nanoModal-" + (modalId++);

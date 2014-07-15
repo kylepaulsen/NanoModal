@@ -59,8 +59,9 @@ var nanoModal = (function() {
         }
     })();
 
-    return function(options) {
-        var modalObj = Modal(options);
+    return function(content, options) {
+        options = options || {};
+        var modalObj = Modal(content, options);
 
         if (modalObj) {
             modalObj.modal.el.id = "nanoModal-" + (modalId++);

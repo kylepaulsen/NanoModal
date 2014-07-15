@@ -21,12 +21,10 @@
         <script type="text/javascript" src="NanoModal.js"></script>
         <script type="text/javascript">
             var modal1 = nanoModal("Test Content");
-            var modal2 = nanoModal({
-                content: "Click outside the modal to close.",
+            var modal2 = nanoModal("Click outside the modal to close.", {
                 buttons: []
             });
-            var modal3 = nanoModal({
-                content: "This is super test content.",
+            var modal3 = nanoModal("This is super test content.", {
                 overlayClose: false,
                 buttons: [{
                     text: "OK",
@@ -35,22 +33,21 @@
                 }, {
                     text: "Cancel",
                     handler: function(){
-                        nanoModal({content: "Can't Cancel!!! >:(", autoRemove: true}).show();
+                        nanoModal("Can't Cancel!!! >:(", {autoRemove: true}).show();
                     }
                 }]
             });
-            var modal4 = nanoModal({
-                content: document.getElementById("modal3"),
+            var modal4 = nanoModal(document.getElementById("modal3"), {
                 overlayClose: false,
                 buttons: [{
                     text: "WHOA DUDE!",
                     handler: function() {
                         var name = document.getElementById("name").value;
                         if (name.length < 1) {
-                             nanoModal({content: "NO! Enter your name NOW!", autoRemove: true}).show();
+                             nanoModal("NO! Enter your name NOW!", {autoRemove: true}).show();
                         } else {
                             modal4.hide();
-                             nanoModal({content: "Well hello there, " + name, autoRemove: true}).show();
+                             nanoModal("Well hello there, " + name, {autoRemove: true}).show();
                         }
                     },
                     primary: true
