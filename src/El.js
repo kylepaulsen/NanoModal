@@ -36,8 +36,11 @@ function El(tag, classNames) {
     }
 
     function addClickListener(handler) {
-        addListener("click", handler);
-        addListener("touchstart", handler);
+        if ('ontouchstart' in document.documentElement) {
+            addListener("touchstart", handler);
+        } else {
+            addListener("click", handler);
+        }
     }
 
     function show() {

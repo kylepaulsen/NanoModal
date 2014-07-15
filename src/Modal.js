@@ -19,6 +19,12 @@ function Modal(content, options) {
     var onShowEvent = ModalEvent();
     var onHideEvent = ModalEvent();
 
+    options.buttons = options.buttons || [{
+        text: "Close",
+        handler: "hide",
+        primary: true
+    }];
+
     var setContent = function(newContent) {
         // Only good way of checking if a node in IE8...
         if (newContent.nodeType) {
@@ -29,12 +35,6 @@ function Modal(content, options) {
         }
     };
     setContent(content);
-
-    options.buttons = options.buttons || [{
-        text: "Close",
-        handler: "hide",
-        primary: true
-    }];
 
     var show = function() {
         modalsContainer.add(modal);
@@ -105,6 +105,7 @@ function Modal(content, options) {
             }
         }
     };
+
     setButtons(options.buttons);
 
     modalsContainer.add(modal);
