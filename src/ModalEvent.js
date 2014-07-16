@@ -1,22 +1,27 @@
 function ModalEvent() {
-    var listeners = [];
+    var listeners = {};
+    var nextListenerId = 0;
 
     var addListener = function(callback) {
-        listeners.push(callback);
-        return listeners.length - 1;
+        listeners[nextListenerId] = callback;
+        return nextListenerId++;
     };
 
     var removeListener = function(id) {
-        listeners.splice(id, 1);
+        if (id) {
+            delete listeners[id];
+        }
     };
 
     var removeAllListeners = function() {
-        listeners = [];
+        listeners = {};
     };
 
     var fire = function() {
-        for (var x = 0, num = listeners.length; x < num; ++x) {
-            listeners[x].apply(null, arguments);
+        for (var x = 0, num = nextListenerId; x < num; ++x) {
+            if (listeners[x]) {
+                listeners[x].apply(null, arguments);
+            }
         }
     };
 

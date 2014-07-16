@@ -1,3 +1,5 @@
+var ModalEvent = require("./ModalEvent");
+
 function El(tag, classNames) {
     var doc = document;
     var el = tag.nodeType ? tag : doc.createElement(tag);
@@ -6,7 +8,10 @@ function El(tag, classNames) {
         el.className = classNames;
     }
 
-    function addListener(event, handler) {
+    var onShowEvent = ModalEvent();
+    var onHideEvent = ModalEvent();
+
+    var addListener = function(event, handler) {
         if (el.addEventListener) {
             el.addEventListener(event, handler, false);
         } else {
@@ -16,9 +21,9 @@ function El(tag, classNames) {
             event: event,
             handler: handler
         });
-    }
+    };
 
-    function removeListener(event, handler) {
+    var removeListener = function(event, handler) {
         if (el.removeEventListener) {
             el.removeEventListener(event, handler);
         } else {
@@ -33,74 +38,78 @@ function El(tag, classNames) {
                 break;
             }
         }
-    }
+    };
 
-    function addClickListener(handler) {
+    var addClickListener = function(handler) {
         if ("ontouchend" in document.documentElement) {
             addListener("touchstart", handler);
         } else {
             addListener("click", handler);
         }
-    }
+    };
 
-    function show() {
+    var show = function() {
         if (el) {
             el.style.display = "block";
+            onShowEvent.fire();
         }
-    }
+    };
 
-    function hide() {
+    var hide = function() {
         if (el) {
             el.style.display = "none";
+            onHideEvent.fire();
         }
-    }
+    };
 
-    function isShowing() {
-        return el && el.style.display === "block";
-    }
+    var isShowing = function() {
+        return el.style && el.style.display === "block";
+    };
 
-    function setStyle(style, value) {
+    var setStyle = function(style, value) {
         if (el) {
             el.style[style] = value;
         }
-    }
+    };
 
-    function html(html) {
+    var html = function(html) {
         if (el) {
             el.innerHTML = html;
         }
-    }
+    };
 
-    function text(text) {
+    var text = function(text) {
         if (el) {
             html("");
             el.appendChild(doc.createTextNode(text));
         }
-    }
+    };
 
-    function remove() {
-        var x = eventHandlers.length;
-        var eventHandler;
-        while (x-- > 0) {
-            eventHandler = eventHandlers[x];
-            removeListener(eventHandler.event, eventHandler.handler);
+    var remove = function() {
+        if (el.parentNode) {
+            var x = eventHandlers.length;
+            var eventHandler;
+            while (x-- > 0) {
+                eventHandler = eventHandlers[x];
+                removeListener(eventHandler.event, eventHandler.handler);
+            }
+            el.parentNode.removeChild(el);
+            onShowEvent.removeAllListeners();
+            onHideEvent.removeAllListeners();
         }
-        el.parentNode.removeChild(el);
-    }
+    };
 
-    function add(elObject) {
+    var add = function(elObject) {
         var elementToAppend = elObject.el || elObject;
         el.appendChild(elementToAppend);
-    }
-
-    function addToBody() {
-        doc.body.appendChild(el);
-    }
+    };
 
     return {
         el: el,
         addListener: addListener,
         addClickListener: addClickListener,
+        onShowEvent: onShowEvent,
+        onHideEvent: onHideEvent,
         show: show,
         hide: hide,
         isShowing: isShowing,
@@ -108,8 +117,7 @@ function El(tag, classNames) {
         html: html,
         text: text,
         remove: remove,
-        add: add,
-        addToBody: addToBody
+        add: add
     };
 }
 

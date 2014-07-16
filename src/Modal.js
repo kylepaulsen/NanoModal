@@ -1,23 +1,21 @@
 
 var El = require("./El");
-var ModalEvent = require("./ModalEvent");
 
-function Modal(content, options) {
+function Modal(content, options, overlay, customShow, customHide) {
     if (content === undefined) {
         return;
     }
     options = options || {};
-    var modal = El("div", "nanoModal nanoModalOverride");
+    var modal = El("div", "nanoModal nanoModalOverride " + (options.classes || ""));
     var contentContainer = El("div", "nanoModalContent");
     var buttonArea = El("div", "nanoModalButtons");
+    var onRequestHideListenerId;
+
     modal.add(contentContainer);
     modal.add(buttonArea);
+    modal.setStyle("display", "none");
 
     var buttons = [];
-    var modalsContainer = El(document.getElementById("nanoModalsContainer"));
-
-    var onShowEvent = ModalEvent();
-    var onHideEvent = ModalEvent();
 
     options.buttons = options.buttons || [{
         text: "Close",
@@ -38,38 +36,78 @@ function Modal(content, options) {
         modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
     };
 
+    var anyModalsOpen = function() {
+        var modals = document.querySelectorAll(".nanoModal");
+        var t = modals.length;
+        while (t-- > 0) {
+            if (modals[t].style.display !== "none") {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    var defaultShow = function() {
+        if (!modal.isShowing()) {
+            // hide the overlay first so that all other modals hide too.
+            overlay.show();
+            // Call the static method from the Modal module.
+            Modal.resizeOverlay();
+            modal.show();
+            center();
+        }
+    };
+
+    var defaultHide = function() {
+        if (modal.isShowing()) {
+            modal.hide();
+            if (!anyModalsOpen()) {
+                overlay.hide();
+            }
+            if (options.autoRemove) {
+                pub.remove();
+            }
+        }
+    };
+
     var pub = {
         modal: modal,
+        overlay: overlay,
         content: content,
         options: options,
         show: function() {
-            modalsContainer.add(modal);
-            modal.show();
-            center();
-            onShowEvent.fire(pub);
+            if (customShow) {
+                customShow(defaultShow, pub);
+            } else {
+                defaultShow();
+            }
             return pub;
         },
         hide: function() {
-            if (modal.isShowing()) {
-                modal.hide();
-                onHideEvent.fire(pub);
+            if (customHide) {
+                customHide(defaultHide, pub);
+            } else {
+                defaultHide();
             }
             return pub;
         },
         onShow: function(callback) {
-            onShowEvent.addListener(callback);
+            modal.onShowEvent.addListener(function() {
+                callback(pub);
+            });
             return pub;
         },
         onHide: function(callback) {
-            onHideEvent.addListener(callback);
+            modal.onHideEvent.addListener(function() {
+                callback(pub);
+            });
             return pub;
         },
         remove: function() {
-            pub.hide();
+            overlay.onRequestHide.removeListener(onRequestHideListenerId);
+            onRequestHideListenerId = null;
             removeButtons();
             modal.remove();
-            onShowEvent.removeAllListeners();
-            onHideEvent.removeAllListeners();
         },
         setButtons: function(buttonList) {
             var btnIdx = buttonList.length;
@@ -116,10 +154,35 @@ function Modal(content, options) {
         }
     };
 
+    onRequestHideListenerId = overlay.onRequestHide.addListener(function() {
+        if (options.overlayClose !== false && modal.isShowing()) {
+            pub.hide();
+        }
+    });
+
     pub.setContent(content).setButtons(options.buttons);
-    modalsContainer.add(modal);
+
+    document.body.appendChild(modal.el);
 
     return pub;
 }
+
+var doc = document;
+
+var getDocumentDim = function(name) {
+    var docE = doc.documentElement;
+    var scroll = "scroll" + name;
+    var offset = "offset" + name;
+    return Math.max(doc.body[scroll], docE[scroll],
+        doc.body[offset], docE[offset], docE["client" + name]);
+};
+
+// Make this a static function so that main.js has access to it so it can
+// add a window keydown event listener. Modal.js also needs this function.
+Modal.resizeOverlay = function() {
+    var overlay = doc.getElementById("nanoModalOverlay");
+    overlay.style.width = getDocumentDim("Width") + "px";
+    overlay.style.height = getDocumentDim("Height") + "px";
+};
 
 module.exports = Modal;

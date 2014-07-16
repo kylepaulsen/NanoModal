@@ -3,8 +3,15 @@
     <head>
         <title>NanoModal Example Page</title>
         <style>
-        .nanoModalOverlay.nanoModalOverride {
-            z-index: 2000;
+        .redText {
+            color: red;
+        }
+        .nanoModal.nanoModalOverride, .nanoModalOverlay.nanoModalOverride {
+            opacity: 0;
+            -webkit-transition: opacity 0.5s ease;
+            -moz-transition: opacity 0.5s ease;
+            -o-transition: opacity 0.5s ease;
+            transition: opacity 0.5s ease;
         }
         </style>
     </head>
@@ -25,10 +32,27 @@
 
         <script type="text/javascript" src="NanoModal.js"></script>
         <script type="text/javascript">
+            nanoModal.customShow = function(defaultShow, modalAPI) {
+                defaultShow();
+                modalAPI.overlay.el.style.opacity = 0.5;
+                modalAPI.modal.el.style.opacity = 1;
+            };
+            nanoModal.customHide = function(defaultHide, modalAPI) {
+                modalAPI.overlay.el.style.opacity = 0;
+                modalAPI.modal.el.style.opacity = 0;
+                setTimeout(defaultHide, 500);
+            };
+
             var modal1 = nanoModal("Test Content");
+
+            var numShown = 0;
             var modal2 = nanoModal("", {
                 buttons: []
+            }).onShow(function(modal) {
+                modal.setContent("Click outside the modal to close or press escape.<br>" +
+                    "This Modal has been shown " + (++numShown) + " times.");
             });
+
             var modal3 = nanoModal("This is super test content.", {
                 overlayClose: false,
                 buttons: [{
@@ -38,26 +62,23 @@
                 }, {
                     text: "Cancel",
                     handler: function() {
-                        nanoModal("Can't Cancel!!! >:(", {autoRemove: true}).show();
+                        modal3.hide();
+                        nanoModal("Can't Cancel!!! >:(", {autoRemove: true, classes: "redText"}).show().onHide(modal3.show);
                     }
                 }]
             });
-            var numShown = 0;
-            modal2.onShow(function(modal) {
-                modal.setContent("Click outside the modal to close or press escape.<br>" +
-                    "This Modal has been shown " + (++numShown) + " times.");
-            });
+
             var modal4 = nanoModal(document.getElementById("modal3"), {
                 overlayClose: false,
                 buttons: [{
                     text: "WHOA DUDE!",
                     handler: function() {
                         var name = document.getElementById("name").value;
+                        modal4.hide();
                         if (name.length < 1) {
-                             nanoModal("NO! Enter your name NOW!", {autoRemove: true}).show();
+                            nanoModal("NO! Enter your name NOW!", {autoRemove: true}).show().onHide(modal4.show);
                         } else {
-                            modal4.hide();
-                             nanoModal("Well hello there, " + name, {autoRemove: true}).show();
+                            nanoModal("Well hello there, " + name, {autoRemove: true}).show();
                         }
                     },
                     primary: true
@@ -144,5 +165,6 @@
             }
             //memLeakTest3();
         </script>
+        <div style="width: 200px; height: 3000px; border: 1px solid #000"></div>
     </body>
 </html>

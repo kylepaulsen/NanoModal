@@ -1,4 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var ModalEvent = require("./ModalEvent");
+
 function El(tag, classNames) {
     var doc = document;
     var el = tag.nodeType ? tag : doc.createElement(tag);
@@ -7,7 +9,10 @@ function El(tag, classNames) {
         el.className = classNames;
     }
 
-    function addListener(event, handler) {
+    var onShowEvent = ModalEvent();
+    var onHideEvent = ModalEvent();
+
+    var addListener = function(event, handler) {
         if (el.addEventListener) {
             el.addEventListener(event, handler, false);
         } else {
@@ -17,9 +22,9 @@ function El(tag, classNames) {
             event: event,
             handler: handler
         });
-    }
+    };
 
-    function removeListener(event, handler) {
+    var removeListener = function(event, handler) {
         if (el.removeEventListener) {
             el.removeEventListener(event, handler);
         } else {
@@ -34,74 +39,78 @@ function El(tag, classNames) {
                 break;
             }
         }
-    }
+    };
 
-    function addClickListener(handler) {
+    var addClickListener = function(handler) {
         if ("ontouchend" in document.documentElement) {
             addListener("touchstart", handler);
         } else {
             addListener("click", handler);
         }
-    }
+    };
 
-    function show() {
+    var show = function() {
         if (el) {
             el.style.display = "block";
+            onShowEvent.fire();
         }
-    }
+    };
 
-    function hide() {
+    var hide = function() {
         if (el) {
             el.style.display = "none";
+            onHideEvent.fire();
         }
-    }
+    };
 
-    function isShowing() {
-        return el && el.style.display === "block";
-    }
+    var isShowing = function() {
+        return el.style && el.style.display === "block";
+    };
 
-    function setStyle(style, value) {
+    var setStyle = function(style, value) {
         if (el) {
             el.style[style] = value;
         }
-    }
+    };
 
-    function html(html) {
+    var html = function(html) {
         if (el) {
             el.innerHTML = html;
         }
-    }
+    };
 
-    function text(text) {
+    var text = function(text) {
         if (el) {
             html("");
             el.appendChild(doc.createTextNode(text));
         }
-    }
+    };
 
-    function remove() {
-        var x = eventHandlers.length;
-        var eventHandler;
-        while (x-- > 0) {
-            eventHandler = eventHandlers[x];
-            removeListener(eventHandler.event, eventHandler.handler);
+    var remove = function() {
+        if (el.parentNode) {
+            var x = eventHandlers.length;
+            var eventHandler;
+            while (x-- > 0) {
+                eventHandler = eventHandlers[x];
+                removeListener(eventHandler.event, eventHandler.handler);
+            }
+            el.parentNode.removeChild(el);
+            onShowEvent.removeAllListeners();
+            onHideEvent.removeAllListeners();
         }
-        el.parentNode.removeChild(el);
-    }
+    };
 
-    function add(elObject) {
+    var add = function(elObject) {
         var elementToAppend = elObject.el || elObject;
         el.appendChild(elementToAppend);
-    }
-
-    function addToBody() {
-        doc.body.appendChild(el);
-    }
+    };
 
     return {
         el: el,
         addListener: addListener,
         addClickListener: addClickListener,
+        onShowEvent: onShowEvent,
+        onHideEvent: onHideEvent,
         show: show,
         hide: hide,
         isShowing: isShowing,
@@ -109,34 +118,31 @@ function El(tag, classNames) {
         html: html,
         text: text,
         remove: remove,
-        add: add,
-        addToBody: addToBody
+        add: add
     };
 }
 
 module.exports = El;
 
-},{}],2:[function(require,module,exports){
+},{"./ModalEvent":3}],2:[function(require,module,exports){
 
 var El = require("./El");
-var ModalEvent = require("./ModalEvent");
 
-function Modal(content, options) {
+function Modal(content, options, overlay, customShow, customHide) {
     if (content === undefined) {
         return;
     }
     options = options || {};
-    var modal = El("div", "nanoModal nanoModalOverride");
+    var modal = El("div", "nanoModal nanoModalOverride " + (options.classes || ""));
     var contentContainer = El("div", "nanoModalContent");
     var buttonArea = El("div", "nanoModalButtons");
+    var onRequestHideListenerId;
+
     modal.add(contentContainer);
     modal.add(buttonArea);
+    modal.setStyle("display", "none");
 
     var buttons = [];
-    var modalsContainer = El(document.getElementById("nanoModalsContainer"));
-
-    var onShowEvent = ModalEvent();
-    var onHideEvent = ModalEvent();
 
     options.buttons = options.buttons || [{
         text: "Close",
@@ -157,38 +163,78 @@ function Modal(content, options) {
         modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
     };
 
+    var anyModalsOpen = function() {
+        var modals = document.querySelectorAll(".nanoModal");
+        var t = modals.length;
+        while (t-- > 0) {
+            if (modals[t].style.display !== "none") {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    var defaultShow = function() {
+        if (!modal.isShowing()) {
+            // hide the overlay first so that all other modals hide too.
+            overlay.show();
+            // Call the static method from the Modal module.
+            Modal.resizeOverlay();
+            modal.show();
+            center();
+        }
+    };
+
+    var defaultHide = function() {
+        if (modal.isShowing()) {
+            modal.hide();
+            if (!anyModalsOpen()) {
+                overlay.hide();
+            }
+            if (options.autoRemove) {
+                pub.remove();
+            }
+        }
+    };
+
     var pub = {
         modal: modal,
+        overlay: overlay,
         content: content,
         options: options,
         show: function() {
-            modalsContainer.add(modal);
-            modal.show();
-            center();
-            onShowEvent.fire(pub);
+            if (customShow) {
+                customShow(defaultShow, pub);
+            } else {
+                defaultShow();
+            }
             return pub;
         },
         hide: function() {
-            if (modal.isShowing()) {
-                modal.hide();
-                onHideEvent.fire(pub);
+            if (customHide) {
+                customHide(defaultHide, pub);
+            } else {
+                defaultHide();
             }
             return pub;
         },
         onShow: function(callback) {
-            onShowEvent.addListener(callback);
+            modal.onShowEvent.addListener(function() {
+                callback(pub);
+            });
             return pub;
         },
         onHide: function(callback) {
-            onHideEvent.addListener(callback);
+            modal.onHideEvent.addListener(function() {
+                callback(pub);
+            });
             return pub;
         },
         remove: function() {
-            pub.hide();
+            overlay.onRequestHide.removeListener(onRequestHideListenerId);
+            onRequestHideListenerId = null;
             removeButtons();
             modal.remove();
-            onShowEvent.removeAllListeners();
-            onHideEvent.removeAllListeners();
         },
         setButtons: function(buttonList) {
             var btnIdx = buttonList.length;
@@ -235,34 +281,65 @@ function Modal(content, options) {
         }
     };
 
+    onRequestHideListenerId = overlay.onRequestHide.addListener(function() {
+        if (options.overlayClose !== false && modal.isShowing()) {
+            pub.hide();
+        }
+    });
+
     pub.setContent(content).setButtons(options.buttons);
-    modalsContainer.add(modal);
+    //onHideListenerId = overlay.onHideEvent.addListener(pub.hide);
+
+    document.body.appendChild(modal.el);
 
     return pub;
 }
 
+var doc = document;
+
+var getDocumentDim = function(name) {
+    var docE = doc.documentElement;
+    var scroll = "scroll" + name;
+    var offset = "offset" + name;
+    return Math.max(doc.body[scroll], docE[scroll],
+        doc.body[offset], docE[offset], docE["client" + name]);
+};
+
+// Make this a static function so that main.js has access to it so it can
+// add a window keydown event listener. Modal.js also needs this function.
+Modal.resizeOverlay = function() {
+    var overlay = doc.getElementById("nanoModalOverlay");
+    overlay.style.width = getDocumentDim("Width") + "px";
+    overlay.style.height = getDocumentDim("Height") + "px";
+};
+
 module.exports = Modal;
 
-},{"./El":1,"./ModalEvent":3}],3:[function(require,module,exports){
+},{"./El":1}],3:[function(require,module,exports){
 function ModalEvent() {
-    var listeners = [];
+    var listeners = {};
+    var nextListenerId = 0;
 
     var addListener = function(callback) {
-        listeners.push(callback);
-        return listeners.length - 1;
+        listeners[nextListenerId] = callback;
+        return nextListenerId++;
     };
 
     var removeListener = function(id) {
-        listeners.splice(id, 1);
+        if (id) {
+            delete listeners[id];
+        }
     };
 
     var removeAllListeners = function() {
-        listeners = [];
+        listeners = {};
     };
 
     var fire = function() {
-        for (var x = 0, num = listeners.length; x < num; ++x) {
-            listeners[x].apply(null, arguments);
+        for (var x = 0, num = nextListenerId; x < num; ++x) {
+            if (listeners[x]) {
+                listeners[x].apply(null, arguments);
+            }
         }
     };
 
@@ -277,88 +354,21 @@ function ModalEvent() {
 module.exports = ModalEvent;
 
 },{}],4:[function(require,module,exports){
-function ModalStack() {
-    var stack = [];
+var ModalEvent = require("./ModalEvent");
 
-    var remove = function(modalObj) {
-        var t = stack.length;
-        while (t-- > 0) {
-            if (stack[t] === modalObj) {
-                stack.splice(t, 1);
-                break;
-            }
-        }
-    };
-
-    var getZIndex = function() {
-        var overlay = document.querySelector(".nanoModalOverlay");
-        var currentStyle = overlay.currentStyle;
-        var zIndex = 9998;
-        if (window.getComputedStyle) {
-            var computed = getComputedStyle(overlay).zIndex;
-            if (!isNaN(parseInt(computed, 10))) {
-                zIndex = computed;
-            }
-        } else {
-            if (currentStyle && !isNaN(parseInt(currentStyle.zIndex, 10))) {
-                zIndex = currentStyle.zIndex;
-            }
-        }
-        return parseInt(zIndex, 10);
-    };
-
-    // public
-    var top = function() {
-        return stack[stack.length - 1];
-    };
-
-    var push = function(modalObj) {
-        var zIndex = getZIndex();
-        remove(modalObj);
-        if (stack.length > 0) {
-            top().modal.setStyle("zIndex", zIndex - 1);
-        }
-        stack.push(modalObj);
-        modalObj.modal.setStyle("zIndex", zIndex + 1);
-    };
-
-    var pop = function() {
-        var obj = stack.pop();
-        if (stack.length > 0) {
-            top().modal.setStyle("zIndex", getZIndex() + 1);
-        }
-        return obj;
-    };
-
-    return {
-        stack: stack,
-        push: push,
-        pop: pop,
-        top: top,
-        remove: remove
-    };
-}
-
-module.exports = ModalStack;
-
-},{}],5:[function(require,module,exports){
 var nanoModal = (function() {
 
     
 
     var El = require("./El");
     var Modal = require("./Modal");
-    var ModalStack = require("./ModalStack");
 
     var overlay;
-    var overlayClose = true;
-    var modalsContainer;
-    var modalStack = ModalStack();
     var doc = document;
     var orientationChange = "orientationchange";
 
     (function init() {
-        if (doc.querySelectorAll(".nanoModalOverlay").length === 0) {
+        if (!doc.querySelector("#nanoModalOverlay")) {
             // Put the main styles on the page.
             var styleObj = El("style");
             var style = styleObj.el;
@@ -374,90 +384,42 @@ var nanoModal = (function() {
 
             // Make the overlay and put it on the page.
             overlay = El("div", "nanoModalOverlay nanoModalOverride");
+            overlay.el.id = "nanoModalOverlay";
+            doc.body.appendChild(overlay.el);
+
+            // Add an event so that the modals can hook into it to close.
+            overlay.onRequestHide = ModalEvent();
+
             var overlayCloseFunc = function() {
-                if (overlayClose) {
-                    if (modalStack.stack.length === 1) {
-                        overlay.hide();
-                    }
-                    modalStack.top().hide();
-                }
+                overlay.onRequestHide.fire();
             };
+
             overlay.addClickListener(overlayCloseFunc);
             El(doc).addListener("keydown", function(e) {
-                if (modalStack.stack.length) {
-                    var keyCode = e.which || e.keyCode;
-                    if (keyCode === 27) { // 27 is Escape
-                        overlayCloseFunc();
-                    }
+                var keyCode = e.which || e.keyCode;
+                if (keyCode === 27) { // 27 is Escape
+                    overlayCloseFunc();
                 }
             });
-            overlay.addToBody(overlay);
-
-            modalsContainer = El("div");
-            modalsContainer.el.id = "nanoModalsContainer";
-            modalsContainer.addToBody();
         }
     })();
 
-    // private functions
-    var setOverlayClose = function() {
-        var options = modalStack.top().options;
-        overlayClose = options.overlayClose !== false;
-    };
-
-    var getDocumentDim = function(name) {
-        var elem = doc;
-        var docE = elem.documentElement;
-        var scroll = "scroll" + name;
-        var offset = "offset" + name;
-        return Math.max(elem.body[scroll], docE[scroll],
-            elem.body[offset], docE[offset], docE["client" + name]);
-    };
-
-    var resizeOverlay = function() {
-        overlay.setStyle("width", getDocumentDim("Width") + "px");
-        overlay.setStyle("height", getDocumentDim("Height") + "px");
-    };
-
-    if (orientationChange in document.documentElement) {
+    if (orientationChange in doc.documentElement) {
         // Make SURE we have the correct dimensions so we make the overlay the right size.
         // Some devices fire the event before the document is ready to return the new dimensions.
         window.addEventListener(orientationChange, function() {
             for (var t = 0; t < 3; ++t) {
-                setTimeout(resizeOverlay, 1000 * t + 200);
+                setTimeout(Modal.resizeOverlay, 1000 * t + 200);
             }
         });
     }
 
-    return function(content, options) {
-        options = options || {};
-        var modalObj = Modal(content, options);
-
-        if (modalObj) {
-            modalObj.onShow(function() {
-                overlay.show();
-                modalStack.push(modalObj);
-                setOverlayClose();
-                resizeOverlay();
-            }).onHide(function() {
-                if (modalObj !== modalStack.top()) {
-                    modalStack.remove(modalObj);
-                } else {
-                    modalStack.pop();
-                }
-                if (options.autoRemove) {
-                    modalObj.remove();
-                }
-                if (modalStack.stack.length === 0) {
-                    overlay.hide();
-                } else {
-                    setOverlayClose();
-                }
-            });
-
-            return modalObj;
-        }
+    var api = function(content, options) {
+        return Modal(content, options, overlay, api.customShow, api.customHide);
     };
+    api.resizeOverlay = Modal.resizeOverlay;
+
+    return api;
 })();
 
 if (typeof window !== "undefined") {
@@ -472,4 +434,4 @@ if (typeof module !== "undefined") {
     module.exports = nanoModal;
 }
 
-},{"./El":1,"./Modal":2,"./ModalStack":4}]},{},[1,2,3,4,5]);
+},{"./El":1,"./Modal":2,"./ModalEvent":3}]},{},[1,2,3,4]);
