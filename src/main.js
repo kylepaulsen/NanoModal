@@ -58,7 +58,7 @@ var nanoModal = (function() {
     // private functions
     var setOverlayClose = function() {
         var options = modalStack.top().options;
-        overlayClose = !!options.overlayClose;
+        overlayClose = options.overlayClose !== false;
     };
 
     var getDocumentDim = function(name) {
