@@ -36,7 +36,7 @@ function El(tag, classNames) {
     }
 
     function addClickListener(handler) {
-        if ('ontouchstart' in document.documentElement) {
+        if ("ontouchend" in document.documentElement) {
             addListener("touchstart", handler);
         } else {
             addListener("click", handler);

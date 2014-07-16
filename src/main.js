@@ -9,25 +9,16 @@ var nanoModal = (function() {
     var overlay;
     var overlayClose = true;
     var modalsContainer;
-
-    var modalId = 0;
     var modalStack = ModalStack();
-
-    var setOverlayClose = function() {
-        var options = modalStack.top().options;
-        if (options.overlayClose === false) {
-            overlayClose = false;
-        } else {
-            overlayClose = true;
-        }
-    };
+    var doc = document;
+    var orientationChange = "orientationchange";
 
     (function init() {
-        if (document.querySelectorAll(".nanoModalOverlay").length === 0) {
+        if (doc.querySelectorAll(".nanoModalOverlay").length === 0) {
             // Put the main styles on the page.
             var styleObj = El("style");
             var style = styleObj.el;
-            var firstElInHead = document.querySelectorAll("head")[0].childNodes[0];
+            var firstElInHead = doc.querySelectorAll("head")[0].childNodes[0];
             firstElInHead.parentNode.insertBefore(style, firstElInHead);
 
             var styleText = fs.readFileSync("src/style.min.css", "utf8");
@@ -48,7 +39,7 @@ var nanoModal = (function() {
                 }
             };
             overlay.addClickListener(overlayCloseFunc);
-            El(document).addListener("keydown", function(e) {
+            El(doc).addListener("keydown", function(e) {
                 if (modalStack.stack.length) {
                     var keyCode = e.which || e.keyCode;
                     if (keyCode === 27) { // 27 is Escape
@@ -64,6 +55,36 @@ var nanoModal = (function() {
         }
     })();
 
+    // private functions
+    var setOverlayClose = function() {
+        var options = modalStack.top().options;
+        overlayClose = !!options.overlayClose;
+    };
+
+    var getDocumentDim = function(name) {
+        var elem = doc;
+        var docE = elem.documentElement;
+        var scroll = "scroll" + name;
+        var offset = "offset" + name;
+        return Math.max(elem.body[scroll], docE[scroll],
+            elem.body[offset], docE[offset], docE["client" + name]);
+    };
+
+    var resizeOverlay = function() {
+        overlay.setStyle("width", getDocumentDim("Width") + "px");
+        overlay.setStyle("height", getDocumentDim("Height") + "px");
+    };
+
+    if (orientationChange in document.documentElement) {
+        // Make SURE we have the correct dimensions so we make the overlay the right size.
+        // Some devices fire the event before the document is ready to return the new dimensions.
+        window.addEventListener(orientationChange, function() {
+            for (var t = 0; t < 3; ++t) {
+                setTimeout(resizeOverlay, 1000 * t + 200);
+            }
+        });
+    }
+
     return function(content, options) {
         options = options || {};
         var modalObj = Modal(content, options);
@@ -73,6 +94,7 @@ var nanoModal = (function() {
                 overlay.show();
                 modalStack.push(modalObj);
                 setOverlayClose();
+                resizeOverlay();
             }).onHide(function() {
                 if (modalObj !== modalStack.top()) {
                     modalStack.remove(modalObj);
@@ -96,7 +118,7 @@ var nanoModal = (function() {
 
 if (typeof window !== "undefined") {
     if (typeof window.define === "function" && window.define.amd) {
-        window.define(function () {
+        window.define(function() {
             return nanoModal;
         });
     }

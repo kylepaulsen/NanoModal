@@ -37,7 +37,7 @@ function El(tag, classNames) {
     }
 
     function addClickListener(handler) {
-        if ('ontouchstart' in document.documentElement) {
+        if ("ontouchend" in document.documentElement) {
             addListener("touchstart", handler);
         } else {
             addListener("click", handler);
@@ -353,28 +353,19 @@ var nanoModal = (function() {
     var overlay;
     var overlayClose = true;
     var modalsContainer;
-
-    var modalId = 0;
     var modalStack = ModalStack();
-
-    var setOverlayClose = function() {
-        var options = modalStack.top().options;
-        if (options.overlayClose === false) {
-            overlayClose = false;
-        } else {
-            overlayClose = true;
-        }
-    };
+    var doc = document;
+    var orientationChange = "orientationchange";
 
     (function init() {
-        if (document.querySelectorAll(".nanoModalOverlay").length === 0) {
+        if (doc.querySelectorAll(".nanoModalOverlay").length === 0) {
             // Put the main styles on the page.
             var styleObj = El("style");
             var style = styleObj.el;
-            var firstElInHead = document.querySelectorAll("head")[0].childNodes[0];
+            var firstElInHead = doc.querySelectorAll("head")[0].childNodes[0];
             firstElInHead.parentNode.insertBefore(style, firstElInHead);
 
-            var styleText = ".nanoModal{position:absolute;top:100px;left:50%;display:none;z-index:9999;min-width:300px;padding:15px 20px 10px;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:#fff;background:-moz-linear-gradient(top,#fff 0,#ddd 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd));background:-webkit-linear-gradient(top,#fff 0,#ddd 100%);background:-o-linear-gradient(top,#fff 0,#ddd 100%);background:-ms-linear-gradient(top,#fff 0,#ddd 100%);background:linear-gradient(to bottom,#fff 0,#ddd 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dddddd', GradientType=0)}.nanoModalOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9998;background:#000;display:none;-ms-filter:\"alpha(Opacity=50)\";-moz-opacity:.5;-khtml-opacity:.5;opacity:.5}.nanoModalButtons{border-top:1px solid #ddd;margin-top:15px;text-align:right}.nanoModalBtn{color:#333;background-color:#fff;display:inline-block;padding:6px 12px;margin:8px 4px 0;font-size:14px;text-align:center;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}.nanoModalBtn:active,.nanoModalBtn:focus,.nanoModalBtn:hover{color:#333;background-color:#e6e6e6;border-color:#adadad}.nanoModalBtn.nanoModalBtnPrimary{color:#fff;background-color:#428bca;border-color:#357ebd}.nanoModalBtn.nanoModalBtnPrimary:active,.nanoModalBtn.nanoModalBtnPrimary:focus,.nanoModalBtn.nanoModalBtnPrimary:hover{color:#fff;background-color:#3071a9;border-color:#285e8e}";
+            var styleText = ".nanoModal{position:absolute;top:100px;left:50%;display:none;z-index:9999;min-width:300px;padding:15px 20px 10px;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:#fff;background:-moz-linear-gradient(top,#fff 0,#ddd 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd));background:-webkit-linear-gradient(top,#fff 0,#ddd 100%);background:-o-linear-gradient(top,#fff 0,#ddd 100%);background:-ms-linear-gradient(top,#fff 0,#ddd 100%);background:linear-gradient(to bottom,#fff 0,#ddd 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dddddd', GradientType=0)}.nanoModalOverlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:9998;background:#000;display:none;-ms-filter:\"alpha(Opacity=50)\";-moz-opacity:.5;-khtml-opacity:.5;opacity:.5}.nanoModalButtons{border-top:1px solid #ddd;margin-top:15px;text-align:right}.nanoModalBtn{color:#333;background-color:#fff;display:inline-block;padding:6px 12px;margin:8px 4px 0;font-size:14px;text-align:center;white-space:nowrap;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px}.nanoModalBtn:active,.nanoModalBtn:focus,.nanoModalBtn:hover{color:#333;background-color:#e6e6e6;border-color:#adadad}.nanoModalBtn.nanoModalBtnPrimary{color:#fff;background-color:#428bca;border-color:#357ebd}.nanoModalBtn.nanoModalBtnPrimary:active,.nanoModalBtn.nanoModalBtnPrimary:focus,.nanoModalBtn.nanoModalBtnPrimary:hover{color:#fff;background-color:#3071a9;border-color:#285e8e}";
             if (style.styleSheet) {
                 style.styleSheet.cssText = styleText;
             } else {
@@ -392,7 +383,7 @@ var nanoModal = (function() {
                 }
             };
             overlay.addClickListener(overlayCloseFunc);
-            El(document).addListener("keydown", function(e) {
+            El(doc).addListener("keydown", function(e) {
                 if (modalStack.stack.length) {
                     var keyCode = e.which || e.keyCode;
                     if (keyCode === 27) { // 27 is Escape
@@ -408,6 +399,36 @@ var nanoModal = (function() {
         }
     })();
 
+    // private functions
+    var setOverlayClose = function() {
+        var options = modalStack.top().options;
+        overlayClose = !!options.overlayClose;
+    };
+
+    var getDocumentDim = function(name) {
+        var elem = doc;
+        var docE = elem.documentElement;
+        var scroll = "scroll" + name;
+        var offset = "offset" + name;
+        return Math.max(elem.body[scroll], docE[scroll],
+            elem.body[offset], docE[offset], docE["client" + name]);
+    };
+
+    var resizeOverlay = function() {
+        overlay.setStyle("width", getDocumentDim("Width") + "px");
+        overlay.setStyle("height", getDocumentDim("Height") + "px");
+    };
+
+    if (orientationChange in document.documentElement) {
+        // Make SURE we have the correct dimensions so we make the overlay the right size.
+        // Some devices fire the event before the document is ready to return the new dimensions.
+        window.addEventListener(orientationChange, function() {
+            for (var t = 0; t < 3; ++t) {
+                setTimeout(resizeOverlay, 1000 * t + 200);
+            }
+        });
+    }
+
     return function(content, options) {
         options = options || {};
         var modalObj = Modal(content, options);
@@ -417,6 +438,7 @@ var nanoModal = (function() {
                 overlay.show();
                 modalStack.push(modalObj);
                 setOverlayClose();
+                resizeOverlay();
             }).onHide(function() {
                 if (modalObj !== modalStack.top()) {
                     modalStack.remove(modalObj);
@@ -440,7 +462,7 @@ var nanoModal = (function() {
 
 if (typeof window !== "undefined") {
     if (typeof window.define === "function" && window.define.amd) {
-        window.define(function () {
+        window.define(function() {
             return nanoModal;
         });
     }
