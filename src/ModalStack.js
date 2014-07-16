@@ -1,7 +1,6 @@
 function ModalStack() {
     var stack = [];
 
-    // private
     var remove = function(modalObj) {
         var t = stack.length;
         while (t-- > 0) {
@@ -38,22 +37,16 @@ function ModalStack() {
         var zIndex = getZIndex();
         remove(modalObj);
         if (stack.length > 0) {
-            var el = top().modal.el;
-            if (el) {
-                el.style.zIndex = zIndex - 1;
-            }
+            top().modal.setStyle("zIndex", zIndex - 1);
         }
         stack.push(modalObj);
-        modalObj.modal.el.style.zIndex = zIndex + 1;
+        modalObj.modal.setStyle("zIndex", zIndex + 1);
     };
 
     var pop = function() {
         var obj = stack.pop();
         if (stack.length > 0) {
-            var el = top().modal.el;
-            if (el) {
-                el.style.zIndex = getZIndex() + 1;
-            }
+            top().modal.setStyle("zIndex", getZIndex() + 1);
         }
         return obj;
     };
@@ -62,7 +55,8 @@ function ModalStack() {
         stack: stack,
         push: push,
         pop: pop,
-        top: top
+        top: top,
+        remove: remove
     };
 }
 
