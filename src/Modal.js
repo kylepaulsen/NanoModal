@@ -49,10 +49,9 @@ function Modal(content, options, overlay, customShow, customHide) {
 
     var defaultShow = function() {
         if (!modal.isShowing()) {
-            // hide the overlay first so that all other modals hide too.
-            overlay.show();
             // Call the static method from the Modal module.
             Modal.resizeOverlay();
+            overlay.show();
             modal.show();
             center();
         }

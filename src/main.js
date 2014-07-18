@@ -9,7 +9,6 @@ var nanoModal = (function() {
 
     var overlay;
     var doc = document;
-    var orientationChange = "orientationchange";
 
     (function init() {
         if (!doc.querySelector("#nanoModalOverlay")) {
@@ -45,18 +44,25 @@ var nanoModal = (function() {
                     overlayCloseFunc();
                 }
             });
+
+            var windowEl = El(window);
+            var resizeOverlayTimeout;
+            windowEl.addListener("resize", function() {
+                if (resizeOverlayTimeout) {
+                    clearTimeout(resizeOverlayTimeout);
+                }
+                resizeOverlayTimeout = setTimeout(Modal.resizeOverlay, 100);
+            });
+
+            // Make SURE we have the correct dimensions so we make the overlay the right size.
+            // Some devices fire the event before the document is ready to return the new dimensions.
+            windowEl.addListener("orientationchange", function() {
+                for (var t = 0; t < 3; ++t) {
+                    setTimeout(Modal.resizeOverlay, 1000 * t + 200);
+                }
+            });
         }
     })();
-
-    if (orientationChange in doc.documentElement) {
-        // Make SURE we have the correct dimensions so we make the overlay the right size.
-        // Some devices fire the event before the document is ready to return the new dimensions.
-        window.addEventListener(orientationChange, function() {
-            for (var t = 0; t < 3; ++t) {
-                setTimeout(Modal.resizeOverlay, 1000 * t + 200);
-            }
-        });
-    }
 
     var api = function(content, options) {
         return Modal(content, options, overlay, api.customShow, api.customHide);

@@ -39,8 +39,13 @@
             };
             nanoModal.customHide = function(defaultHide, modalAPI) {
                 modalAPI.overlay.el.style.opacity = 0;
+                modalAPI.modal.onHideEvent.fire();
                 modalAPI.modal.el.style.opacity = 0;
-                setTimeout(defaultHide, 500);
+                if (document.body.style.transition !== undefined) {
+                    setTimeout(defaultHide, 500);
+                } else {
+                    defaultHide();
+                }
             };
 
             var modal1 = nanoModal("Test Content");
@@ -141,8 +146,7 @@
                 document.body.appendChild(div);
                 var loop = function() {
                     if (iter % 2 === 0) {
-                        memTestModal1 = nanoModal({
-                            content: div,
+                        memTestModal1 = nanoModal(div, {
                             buttons: [{
                                 text: "OK",
                                 handler: "hide",

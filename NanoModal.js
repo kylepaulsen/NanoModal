@@ -3,7 +3,7 @@ var ModalEvent = require("./ModalEvent");
 
 function El(tag, classNames) {
     var doc = document;
-    var el = tag.nodeType ? tag : doc.createElement(tag);
+    var el = (tag.nodeType || tag === window) ? tag : doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;
@@ -176,10 +176,9 @@ function Modal(content, options, overlay, customShow, customHide) {
 
     var defaultShow = function() {
         if (!modal.isShowing()) {
-            // hide the overlay first so that all other modals hide too.
-            overlay.show();
             // Call the static method from the Modal module.
             Modal.resizeOverlay();
+            overlay.show();
             modal.show();
             center();
         }
@@ -288,7 +287,6 @@ function Modal(content, options, overlay, customShow, customHide) {
     });
 
     pub.setContent(content).setButtons(options.buttons);
-    //onHideListenerId = overlay.onHideEvent.addListener(pub.hide);
 
     document.body.appendChild(modal.el);
 
@@ -365,7 +363,6 @@ var nanoModal = (function() {
 
     var overlay;
     var doc = document;
-    var orientationChange = "orientationchange";
 
     (function init() {
         if (!doc.querySelector("#nanoModalOverlay")) {
@@ -401,18 +398,25 @@ var nanoModal = (function() {
                     overlayCloseFunc();
                 }
             });
+
+            var windowEl = El(window);
+            var resizeOverlayTimeout;
+            windowEl.addListener("resize", function() {
+                if (resizeOverlayTimeout) {
+                    clearTimeout(resizeOverlayTimeout);
+                }
+                resizeOverlayTimeout = setTimeout(Modal.resizeOverlay, 100);
+            });
+
+            // Make SURE we have the correct dimensions so we make the overlay the right size.
+            // Some devices fire the event before the document is ready to return the new dimensions.
+            windowEl.addListener("orientationchange", function() {
+                for (var t = 0; t < 3; ++t) {
+                    setTimeout(Modal.resizeOverlay, 1000 * t + 200);
+                }
+            });
         }
     })();
-
-    if (orientationChange in doc.documentElement) {
-        // Make SURE we have the correct dimensions so we make the overlay the right size.
-        // Some devices fire the event before the document is ready to return the new dimensions.
-        window.addEventListener(orientationChange, function() {
-            for (var t = 0; t < 3; ++t) {
-                setTimeout(Modal.resizeOverlay, 1000 * t + 200);
-            }
-        });
-    }
 
     var api = function(content, options) {
         return Modal(content, options, overlay, api.customShow, api.customHide);
