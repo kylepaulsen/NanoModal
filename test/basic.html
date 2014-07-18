@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>NanoModal Basic Tests</title>
+    <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css">
+    <script src="http://code.jquery.com/qunit/qunit-1.14.0.js"></script>
+</head>
+<body>
+
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+
+<script>
+
+    function get(qry) {
+        return document.querySelector(qry);
+    }
+
+    QUnit.test("Basic nanoModal()", function(assert) {
+        var modalString = "This is a basic test.";
+        var modal = nanoModal(modalString);
+        var nanoModalContent = get(".nanoModalContent");
+
+        assert.equal(nanoModalContent.innerHTML, modalString);
+    });
+
+</script>
+<script src="../NanoModal.min.js"></script>
+</body>
+</html>

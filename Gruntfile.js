@@ -21,9 +21,6 @@ module.exports = function(grunt) {
         },
         uglify: {
             options: {
-                compress: {
-                    drop_console: true
-                },
                 mangle: true
             },
             my_target: {
@@ -31,16 +28,18 @@ module.exports = function(grunt) {
                     "<%= pkg.name %>.min.js": ["<%= pkg.name %>.js"]
                 }
             }
+        },
+        qunit: {
+            all: ["test/**/*.html"]
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-cssmin");
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-qunit");
 
-    // grunt.registerTask("test", ["jshint", "qunit"]);
-
-    // grunt.registerTask("default", ["http:closure"]);
-    grunt.registerTask("default", ["cssmin", "browserify", "uglify"]);
+    grunt.registerTask("test", ["qunit"]);
+    grunt.registerTask("dev", ["cssmin", "browserify"]);
+    grunt.registerTask("default", ["dev", "uglify", "test"]);
 };
