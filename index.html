@@ -39,6 +39,7 @@
             };
             nanoModal.customHide = function(defaultHide, modalAPI) {
                 modalAPI.overlay.el.style.opacity = 0;
+                // this is only needed if you have modals that open other modals on the onHide event.
                 modalAPI.modal.onHideEvent.fire();
                 modalAPI.modal.el.style.opacity = 0;
                 if (document.body.style.transition !== undefined) {
@@ -66,10 +67,21 @@
                     primary: true
                 }, {
                     text: "Cancel",
-                    handler: function() {
-                        modal3.hide();
-                        nanoModal("Can't Cancel!!! >:(", {autoRemove: true, classes: "redText"}).show().onHide(modal3.show);
-                    }
+                    handler: function(modal) {
+                        modal.hide();
+                        nanoModal("Can't Cancel!!! >:(", {
+                            autoRemove: true,
+                            classes: "redText", buttons: [{
+                                text: "Close",
+                                handler: function(modalObj) {
+                                    modalObj.hide();
+                                    modal3.show();
+                                },
+                                primary: true
+                            }]
+                        }).show();
+                    },
+                    classes: "whatever"
                 }]
             });
 

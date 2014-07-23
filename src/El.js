@@ -48,17 +48,17 @@ function El(tag, classNames) {
         }
     };
 
-    var show = function() {
+    var show = function(arg) {
         if (el) {
             el.style.display = "block";
-            onShowEvent.fire();
+            onShowEvent.fire(arg);
         }
     };
 
-    var hide = function() {
+    var hide = function(arg) {
         if (el) {
             el.style.display = "none";
-            onHideEvent.fire();
+            onHideEvent.fire(arg);
         }
     };
 

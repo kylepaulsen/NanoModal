@@ -16,6 +16,7 @@ function Modal(content, options, overlay, customShow, customHide) {
     modal.setStyle("display", "none");
 
     var buttons = [];
+    var pub;
 
     options.buttons = options.buttons || [{
         text: "Close",
@@ -51,17 +52,17 @@ function Modal(content, options, overlay, customShow, customHide) {
         if (!modal.isShowing()) {
             // Call the static method from the Modal module.
             Modal.resizeOverlay();
-            overlay.show();
-            modal.show();
+            overlay.show(overlay);
+            modal.show(pub);
             center();
         }
     };
 
     var defaultHide = function() {
         if (modal.isShowing()) {
-            modal.hide();
+            modal.hide(pub);
             if (!anyModalsOpen()) {
-                overlay.hide();
+                overlay.hide(overlay);
             }
             if (options.autoRemove) {
                 pub.remove();
@@ -69,7 +70,7 @@ function Modal(content, options, overlay, customShow, customHide) {
         }
     };
 
-    var pub = {
+    pub = {
         modal: modal,
         overlay: overlay,
         content: content,
@@ -113,6 +114,11 @@ function Modal(content, options, overlay, customShow, customHide) {
             var btnObj;
             var btnEl;
             var classes;
+            var giveButtonCustomClickListener = function(btnEl, btnObj) {
+                btnEl.addClickListener(function() {
+                    btnObj.handler(pub);
+                });
+            };
 
             removeButtons();
 
@@ -126,11 +132,12 @@ function Modal(content, options, overlay, customShow, customHide) {
                     if (btnObj.primary) {
                         classes += " nanoModalBtnPrimary";
                     }
+                    classes += btnObj.classes ? " " + btnObj.classes : "";
                     btnEl = El("button", classes);
                     if (btnObj.handler === "hide") {
                         btnEl.addClickListener(pub.hide);
                     } else if (btnObj.handler) {
-                        btnEl.addClickListener(btnObj.handler);
+                        giveButtonCustomClickListener(btnEl, btnObj);
                     }
                     btnEl.text(btnObj.text);
                     buttonArea.add(btnEl);
