@@ -10,11 +10,7 @@ var nanoModal = (function() {
     var overlay;
     var doc = document;
 
-    if (!document.body) {
-        console.error("Insert the NanoModal script just above your </body> tag.");
-    }
-
-    (function init() {
+    function init() {
         if (!doc.querySelector("#nanoModalOverlay")) {
             // Put the main styles on the page.
             var styleObj = El("style");
@@ -66,9 +62,14 @@ var nanoModal = (function() {
                 }
             });
         }
-    })();
+    }
+
+    if (document.body) {
+        init();
+    }
 
     var api = function(content, options) {
+        init();
         return Modal(content, options, overlay, api.customShow, api.customHide);
     };
     api.resizeOverlay = Modal.resizeOverlay;
