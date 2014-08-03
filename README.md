@@ -1,4 +1,4 @@
-# NanoModal
+# NanoModal [![Build Status](https://travis-ci.org/kylepaulsen/NanoModal.svg?branch=master)](https://travis-ci.org/kylepaulsen/NanoModal)
 
 NanoModal is yet another modal / dialog library written in a small amount of pure JavaScript.
 
