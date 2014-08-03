@@ -67,12 +67,6 @@ function El(tag, classNames) {
         return el.style && el.style.display === "block";
     };
 
-    var setStyle = function(style, value) {
-        if (el) {
-            el.style[style] = value;
-        }
-    };
-
     var html = function(html) {
         if (el) {
             el.innerHTML = html;
@@ -114,7 +108,6 @@ function El(tag, classNames) {
         show: show,
         hide: hide,
         isShowing: isShowing,
-        setStyle: setStyle,
         html: html,
         text: text,
         remove: remove,
@@ -140,7 +133,7 @@ function Modal(content, options, overlay, customShow, customHide) {
 
     modal.add(contentContainer);
     modal.add(buttonArea);
-    modal.setStyle("display", "none");
+    modal.el.style.display = "none";
 
     var buttons = [];
     var pub;
@@ -161,7 +154,7 @@ function Modal(content, options, overlay, customShow, customHide) {
     };
 
     var center = function() {
-        modal.setStyle("marginLeft", -modal.el.clientWidth / 2 + "px");
+        modal.el.style.marginLeft = -modal.el.clientWidth / 2 + "px";
     };
 
     var anyModalsOpen = function() {
@@ -200,8 +193,6 @@ function Modal(content, options, overlay, customShow, customHide) {
     pub = {
         modal: modal,
         overlay: overlay,
-        content: content,
-        options: options,
         show: function() {
             if (customShow) {
                 customShow(defaultShow, pub);
@@ -283,7 +274,11 @@ function Modal(content, options, overlay, customShow, customHide) {
                 contentContainer.html(newContent);
             }
             center();
+            content = newContent;
             return pub;
+        },
+        getContent: function() {
+            return content;
         }
     };
 

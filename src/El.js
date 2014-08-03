@@ -66,12 +66,6 @@ function El(tag, classNames) {
         return el.style && el.style.display === "block";
     };
 
-    var setStyle = function(style, value) {
-        if (el) {
-            el.style[style] = value;
-        }
-    };
-
     var html = function(html) {
         if (el) {
             el.innerHTML = html;
@@ -113,7 +107,6 @@ function El(tag, classNames) {
         show: show,
         hide: hide,
         isShowing: isShowing,
-        setStyle: setStyle,
         html: html,
         text: text,
         remove: remove,

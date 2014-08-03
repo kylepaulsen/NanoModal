@@ -105,16 +105,6 @@
             "The hide event should pass along the argument.");
     });
 
-    QUnit.test("el.setStyle()", function(assert) {
-        var elObj = El("div");
-        var styleVal = "500px";
-
-        elObj.setStyle("width", styleVal);
-
-        assert.strictEqual(elObj.el.style.width, styleVal,
-            "The element should have the width style set to " + styleVal);
-    });
-
     QUnit.test("el.html()", function(assert) {
         var elObj = El("div");
         var htmlContent = "<div><b>hello</b></div>";

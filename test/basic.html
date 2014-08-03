@@ -102,6 +102,22 @@
         modal.remove();
     });
 
+    QUnit.test("nanoModal.getContent()", function(assert) {
+        var contentString = "Hey there!!";
+        var contentEl = $("<div><b>hello world!</b></div>")[0];
+        var modal = nanoModal(contentString);
+
+        assert.strictEqual(modal.getContent(), contentString,
+            "The nanoModal getContent() method should return the current content.");
+
+        modal.setContent(contentEl);
+
+        assert.strictEqual(modal.getContent(), contentEl,
+            "The nanoModal getContent() method should return the current content.");
+
+        modal.remove();
+    });
+
     QUnit.test("nanoModal.setButtons()", function(assert) {
         var modal = nanoModal("modal test 5");
         var nanoModalEl = $(".nanoModal")[0];
