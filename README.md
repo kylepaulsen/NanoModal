@@ -20,7 +20,15 @@ Basic usage:
 var justTextModal = nanoModal("Hello World!");
 justTextModal.show();
 
-// usage case 2:
+/* usage case 2:
+ * given the html:
+ * <!-- hidden modals container -->
+ * <div style="display: none;">
+ *   <div id="myHiddenFormDiv">
+ *     ...
+ *   </div>
+ * </div>
+ */
 var elementModal = nanoModal(document.querySelector("#myHiddenFormDiv"));
 elementModal.show();
 ```
@@ -69,35 +77,35 @@ var modalObj = nanoModal("hi");
 ```
 
 All functions ( except for .remove() and .getContent() ) return the API again so you can chain. Here is the API:
-- modalObj**.show()**
+- modalObj **.show()**
   - Arguments: None
   - Shows the modal and overlay.
-- modalObj**.hide()**
+- modalObj **.hide()**
   - Arguments: None
   - Hides the modal and overlay.
-- modalObj**.remove()**
+- modalObj **.remove()**
   - Arguments: None
   - fully removes the modal from the DOM and removes all event handlers on it.
-- modalObj**.setContent( content )**
+- modalObj **.setContent( content )**
   - Arguments: takes a string or an HTML element as its arg.
   - Will replace the current content with what is given.
-- modalObj**.getContent()**
+- modalObj **.getContent()**
   - Arguments: None
   - Returns what the current content is (could be a string or an HTML element).
-- modalObj**.setButtons( [{ ... }, { ... }] )**
+- modalObj **.setButtons( [{ ... }, { ... }] )**
   - Arguments: takes an array of objects (button definitions).
   - Will replace the current buttons with the given buttons.
-- modalObj**.onShow( func )**
+- modalObj **.onShow( func )**
   - Arguments: takes a function as its arg. The function gets passed this API.
   - The passed function gets called when the modal is shown.
-- modalObj**.onHide( func )**
+- modalObj **.onHide( func )**
   - Arguments: takes a function as its arg. The function gets passed this API.
   - The passed function gets called when the modal is shown.
 
 **Other Properties (You probably wont need to use)**
-- modalObj**.overlay**
+- modalObj **.overlay**
   - The overlay El Object.
-- modalObj**.modal**
+- modalObj **.modal**
   - The modal El Object.
 
 ### Button Definitions
@@ -122,18 +130,18 @@ var elObject2 = modalObj.overlay;
 ```
 
 El Objects are just objects that hold an html element with some helper functions on it:
-- elObject**.el**: The real html element.
-- elObject**.add( el )**: Takes an html element or another El object and appends it to this El object.
-- elObject**.addClickListener( func )**: A shorthand function for adding a touch / click listener. Takes a function.
-- elObject**.addListener( eventString, func )**: Takes an event string (like "click") and a function.
-- elObject**.html( htmlString )**: Sets the inner html of this element.
-- elObject**.text( textString )**: Sets the inner text of this element.
-- elObject**.show()**: Sets the style "display" to "block" on this element.
-- elObject**.hide()**: Sets the style "display" to "none" on this element.
-- elObject**.isShowing()**: Checks to see if the style "display" is "block" on this element.
-- elObject**.remove()**: Removes the element from the DOM and removes all event handlers on it.
-- elObject**.onHideEvent**: A custom made Modal Event object.
-- elObject**.onShowEvent**: A custom made Modal Event object.
+- elObject **.el**: The real html element.
+- elObject **.add( el )**: Takes an html element or another El object and appends it to this El object.
+- elObject **.addClickListener( func )**: A shorthand function for adding a touch / click listener. Takes a function.
+- elObject **.addListener( eventString, func )**: Takes an event string (like "click") and a function.
+- elObject **.html( htmlString )**: Sets the inner html of this element.
+- elObject **.text( textString )**: Sets the inner text of this element.
+- elObject **.show()**: Sets the style "display" to "block" on this element.
+- elObject **.hide()**: Sets the style "display" to "none" on this element.
+- elObject **.isShowing()**: Checks to see if the style "display" is "block" on this element.
+- elObject **.remove()**: Removes the element from the DOM and removes all event handlers on it.
+- elObject **.onHideEvent**: A custom made Modal Event object.
+- elObject **.onShowEvent**: A custom made Modal Event object.
 
 ### Modal Event Objects
 ```javascript
@@ -143,10 +151,10 @@ var modalEventObj2 = modalObj.modal.onHideEvent;
 ```
 
 Modal events are just me making a super simple custom event system:
-- modalEventObj**.addListener( func )**: Adds a function to be called when this event fires. Returns a listener ID.
-- modalEventObj**.removeListener( listenerID )**: Expects an integer id of the listener to remove.
-- modalEventObj**.removeAllListeners()**: Removes all listeners.
-- modalEventObj**.fire()**: Calls all added listeners and passes them the arguments passed to this function.
+- modalEventObj **.addListener( func )**: Adds a function to be called when this event fires. Returns a listener ID.
+- modalEventObj **.removeListener( listenerID )**: Expects an integer id of the listener to remove.
+- modalEventObj **.removeAllListeners()**: Removes all listeners.
+- modalEventObj **.fire()**: Calls all added listeners and passes them the arguments passed to this function.
 
 # License
 
