@@ -1,3 +1,4 @@
+var nanoModal;
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var ModalEvent = require("./ModalEvent");
 
@@ -356,7 +357,7 @@ module.exports = ModalEvent;
 },{}],4:[function(require,module,exports){
 var ModalEvent = require("./ModalEvent");
 
-var nanoModal = (function() {
+var nanoModalAPI = (function() {
 
     
 
@@ -433,6 +434,10 @@ var nanoModal = (function() {
     return api;
 })();
 
+// expose api to var outside browserify so that we can export a module correctly.
+nanoModal = nanoModalAPI;
+
+},{"./El":1,"./Modal":2,"./ModalEvent":3}]},{},[1,2,3,4]);
 if (typeof window !== "undefined") {
     if (typeof window.define === "function" && window.define.amd) {
         window.define(function() {
@@ -444,5 +449,3 @@ if (typeof window !== "undefined") {
 if (typeof module !== "undefined") {
     module.exports = nanoModal;
 }
-
-},{"./El":1,"./Modal":2,"./ModalEvent":3}]},{},[1,2,3,4]);

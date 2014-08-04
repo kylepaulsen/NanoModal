@@ -19,6 +19,16 @@ module.exports = function(grunt) {
                 }
             }
         },
+        concat: {
+            options: {
+                banner: "var nanoModal;\n",
+                footer: grunt.file.read("buildFooter.js")
+            },
+            dist: {
+                src: ["<%= pkg.name %>.js"],
+                dest: "<%= pkg.name %>.js"
+            }
+        },
         uglify: {
             options: {
                 mangle: true
@@ -34,12 +44,13 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-cssmin");
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-qunit");
 
     grunt.registerTask("test", ["qunit"]);
-    grunt.registerTask("dev", ["cssmin", "browserify"]);
+    grunt.registerTask("dev", ["cssmin", "browserify", "concat"]);
     grunt.registerTask("default", ["dev", "uglify", "test"]);
 };
