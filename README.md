@@ -1,6 +1,6 @@
 # NanoModal [![Build Status](https://travis-ci.org/kylepaulsen/NanoModal.svg?branch=master)](https://travis-ci.org/kylepaulsen/NanoModal)
 
-NanoModal is yet another modal / dialog library written in a small amount of pure JavaScript.
+NanoModal is yet another modal / dialog library written in a small amount of pure JavaScript. <a href="http://jsfiddle.net/aKL44/3/" target="_blank">See it in action!</a>
 
 Features:
 
@@ -12,15 +12,23 @@ Features:
 
 I wanted a modal library that was small, easy to use, and worked everywhere - thus NanoModal was born. When I was writing NanoModal, my main goals were: it should be tiny, fully customizable, and it should work on all major browsers (including mobile). Most modal libraries don't work well (or at all) on mobile, especially when users rotate or zoom their device while looking at a modal. I aimed to fix all these problems and make the best modal library I possibly could.
 
+# Install
+
+Get the <a href="https://raw.githubusercontent.com/kylepaulsen/NanoModal/master/nanomodal.min.js">minified</a>, or <a href="https://raw.githubusercontent.com/kylepaulsen/NanoModal/master/nanomodal.js">non-minified</a> source from Github, or install via npm using the following command in your command prompt:
+
+```
+npm install nanomodal
+```
+
 # Usage
 
-Basic usage:
+Basic usage: (See it in action: <a href="http://jsfiddle.net/Zp25P/" target="_blank">Example 1</a>, <a href="http://jsfiddle.net/Rsan5/" target="_blank">Example 2</a>)
 ```javascript
-// usage case 1:
+// example 1:
 var justTextModal = nanoModal("Hello World!");
 justTextModal.show();
 
-/* usage case 2:
+/* example 2:
  * given the html:
  * <!-- hidden modals container -->
  * <div style="display: none;">
@@ -33,22 +41,23 @@ var elementModal = nanoModal(document.querySelector("#myHiddenFormDiv"));
 elementModal.show();
 ```
 
-Usage with more options:
+Usage with more options: (See it in action: <a href="http://jsfiddle.net/PDa78/" target="_blank">Example 1</a>, <a href="http://jsfiddle.net/rxsd4/" target="_blank">Example 2</a>)
 ```javascript
-// usage case 1:
+// example 1:
 var modalWithNoButtons = nanoModal("Hey this is an important message!", {
     buttons: []
 });
 modalWithNoButtons.show();
 
-// usage case 2:
+// example 2:
 var dialogModal = nanoModal("Are you sure you want to do this?", {
     overlayClose: false, // Can't close the modal by clicking on the overlay.
     buttons: [{
         text: "I'm sure!",
         handler: function(modal) {
             // do something...
-            modal.close();
+            alert("doing something...");
+            modal.hide();
         },
         primary: true
     }, {
