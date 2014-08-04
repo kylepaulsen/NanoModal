@@ -128,7 +128,36 @@ When defining custom button objects, here are the properties you can set and wha
 - **primary**: A boolean (true or false). If this is true, it just adds the "nanoModalBtnPrimary" class to the button (which makes it look blue by default).
 - **classes**: A string of space separated classes you want on the button: "myClassA myClassB"
 
-### Note: You probably wont need to deal with the below objects.
+### customShow and customHide
+```javascript
+nanoModal.customShow = function(defaultShow, modalAPI) {
+    defaultShow();
+    modalAPI.overlay.el.style.opacity = 0.5;
+    modalAPI.modal.el.style.opacity = 1;
+};
+nanoModal.customHide = function(defaultHide, modalAPI) {
+    modalAPI.overlay.el.style.opacity = 0;
+    // this is only needed if you have modals that open other modals on the onHide event.
+    // modalAPI.modal.onHideEvent.fire();
+    modalAPI.modal.el.style.opacity = 0;
+    if (document.body.style.transition !== undefined) {
+        setTimeout(defaultHide, 500);
+    } else {
+        defaultHide();
+    }
+};
+```
+
+The customShow and customHide properties on the main nanoModal var can be used to customize the experience of your modals. When defined, your functions will get passed the defaultShow or defaultHide methods that you must call eventually. Your functions will also be passed the corresponding modalAPI that is responsible for the modal that is being shown or hidden. The above example shows how you can make all modals fade in and out. Keep in mind you will also need some CSS like:
+
+```
+.nanoModal.nanoModalOverride, .nanoModalOverlay.nanoModalOverride {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+```
+
+### Note: You probably wont need to deal with the stuff below.
 ---
 
 ### El Objects
@@ -164,6 +193,9 @@ Modal events are just me making a super simple custom event system:
 - modalEventObj **.removeListener( listenerID )**: Expects an integer id of the listener to remove.
 - modalEventObj **.removeAllListeners()**: Removes all listeners.
 - modalEventObj **.fire()**: Calls all added listeners and passes them the arguments passed to this function.
+
+### nanoModal.resizeOverlay()
+This exists just in case the overlay is not behaving on your screen or mobile device.
 
 # License
 
