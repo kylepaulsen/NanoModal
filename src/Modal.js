@@ -70,6 +70,16 @@ function Modal(content, options, overlay, customShow, customHide) {
         }
     };
 
+    var quickClone = function(obj) {
+        var newObj = {};
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                newObj[key] = obj[key];
+            }
+        }
+        return newObj;
+    };
+
     pub = {
         modal: modal,
         overlay: overlay,
@@ -113,8 +123,10 @@ function Modal(content, options, overlay, customShow, customHide) {
             var btnEl;
             var classes;
             var giveButtonCustomClickListener = function(btnEl, btnObj) {
-                btnEl.addClickListener(function() {
-                    btnObj.handler(pub);
+                var pubCopy = quickClone(pub);
+                btnEl.addClickListener(function(e) {
+                    pubCopy.event = e || window.event;
+                    btnObj.handler(pubCopy);
                 });
             };
 

@@ -124,7 +124,7 @@ var modalObj = nanoModal("sup", {buttons: [ /* button definition objects here */
 
 When defining custom button objects, here are the properties you can set and what they do:
 - **text**: The string of text that goes inside the button.
-- **handler**: This can be the string "hide" *OR* a function. If it is the string "hide", the button will simply close the modal when it is clicked. Otherwise the passed function will be called when the button is clicked. The function will also be passed the modal API.
+- **handler**: This can be the string "hide" *OR* a function. If it is the string "hide", the button will simply close the modal when it is clicked. Otherwise the passed function will be called when the button is clicked. The function will also be passed the modal API with the click event added on under the key 'event'.
 - **primary**: A boolean (true or false). If this is true, it just adds the "nanoModalBtnPrimary" class to the button (which makes it look blue by default).
 - **classes**: A string of space separated classes you want on the button: "myClassA myClassB"
 

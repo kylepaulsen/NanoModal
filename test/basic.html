@@ -166,8 +166,9 @@
         touchClick(nanoModalButtons[0]);
 
         assert.ok(wasHandlerCalled, "After clicking the second button, the handler should be called.");
-        assert.strictEqual(handlerArg, modal,
-            "After clicking the second button, the handler should be passed the modal as an argument.");
+        assert.deepEqual(Object.keys(handlerArg), ["modal", "overlay", "show", "hide", "onShow",
+            "onHide", "remove", "setButtons", "setContent", "getContent", "event"],
+            "After clicking the second button, the handler should be passed an object with these keys.");
 
         modal.remove();
     });
