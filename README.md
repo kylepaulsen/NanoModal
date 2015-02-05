@@ -157,6 +157,16 @@ The customShow and customHide properties on the main nanoModal var can be used t
 }
 ```
 
+### Making the modal stick to your scroll position
+
+```
+.nanoModal.nanoModalOverride {
+    position: fixed;
+}
+```
+
+You should test on your target mobile browsers though, as position fixed can do some weird things on mobile. I might add a built in feature for this if people want it (file an issue).
+
 ### Note: You probably wont need to deal with the stuff below.
 ---
 
