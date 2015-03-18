@@ -42,8 +42,6 @@ function El(tag, classNames) {
         }
     };
 
-
-});
     var addClickListener = function(handler) {
         var flag = false;
         var wrappedHandler = function(evt){
@@ -54,7 +52,7 @@ function El(tag, classNames) {
             }
         }
         addListener("touchstart", wrappedHandler);
-        addListener("click", wrappedHandler);
+        addListener("mousedown", wrappedHandler);
     };
 
     var show = function(arg) {
