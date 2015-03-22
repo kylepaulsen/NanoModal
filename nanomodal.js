@@ -43,11 +43,16 @@ function El(tag, classNames) {
     };
 
     var addClickListener = function(handler) {
-        if ("ontouchend" in document.documentElement) {
-            addListener("touchstart", handler);
-        } else {
-            addListener("click", handler);
+        var flag = false;
+        var wrappedHandler = function(evt){
+            if (!flag){
+                flag = true;
+                setTimeout(function(){ flag = false; }, 100);
+                handler(evt);
+            }
         }
+        addListener("touchstart", wrappedHandler);
+        addListener("mousedown", wrappedHandler);
     };
 
     var show = function(arg) {
@@ -371,7 +376,7 @@ var ModalEvent = require("./ModalEvent");
 
 var nanoModalAPI = (function() {
 
-    
+
 
     var El = require("./El");
     var Modal = require("./Modal");
