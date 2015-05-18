@@ -41,11 +41,18 @@ function El(tag, classNames) {
     };
 
     var addClickListener = function(handler) {
-        if ("ontouchend" in document.documentElement) {
-            addListener("touchstart", handler);
-        } else {
-            addListener("click", handler);
-        }
+        var throttle = false;
+        var throttleHandler = function(e) {
+            if (!throttle) {
+                throttle = true;
+                setTimeout(function() {
+                    throttle = false;
+                }, 100);
+                handler(e);
+            }
+        };
+        addListener("touchstart", throttleHandler);
+        addListener("mousedown", throttleHandler);
     };
 
     var show = function(arg) {

@@ -43,16 +43,18 @@ function El(tag, classNames) {
     };
 
     var addClickListener = function(handler) {
-        var flag = false;
-        var wrappedHandler = function(evt){
-            if (!flag){
-                flag = true;
-                setTimeout(function(){ flag = false; }, 100);
-                handler(evt);
+        var throttle = false;
+        var throttleHandler = function(e) {
+            if (!throttle) {
+                throttle = true;
+                setTimeout(function() {
+                    throttle = false;
+                }, 100);
+                handler(e);
             }
-        }
-        addListener("touchstart", wrappedHandler);
-        addListener("mousedown", wrappedHandler);
+        };
+        addListener("touchstart", throttleHandler);
+        addListener("mousedown", throttleHandler);
     };
 
     var show = function(arg) {
@@ -376,7 +378,7 @@ var ModalEvent = require("./ModalEvent");
 
 var nanoModalAPI = (function() {
 
-
+    
 
     var El = require("./El");
     var Modal = require("./Modal");
