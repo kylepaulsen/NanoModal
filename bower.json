@@ -1,6 +1,6 @@
 {
     "name": "nanomodal",
-    "version": "5.1.1",
+    "version": "5.1.2",
     "homepage": "https://github.com/kylepaulsen/NanoModal",
     "authors": [
         "Kyle Paulsen <kyle.a.paulsen@gmail.com>"
@@ -15,7 +15,7 @@
     "keywords": [ "modal" ],
     "license": "MIT",
     "ignore": [
-        "**/.*",
+        ".*",
         "node_modules",
         "test",
         "src"

@@ -20,6 +20,12 @@ Get the <a href="https://raw.githubusercontent.com/kylepaulsen/NanoModal/master/
 npm install nanomodal
 ```
 
+Or Bower:
+
+```
+bower install nanomodal
+```
+
 # Usage
 
 Basic usage: (See it in action: <a href="http://jsfiddle.net/Zp25P/" target="_blank">Example 1</a>, <a href="http://jsfiddle.net/Rsan5/" target="_blank">Example 2</a>)
