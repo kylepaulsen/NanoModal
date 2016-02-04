@@ -122,6 +122,7 @@ function Modal(content, options, overlay, customShow, customHide) {
             var btnObj;
             var btnEl;
             var classes;
+            var id;
             var giveButtonCustomClickListener = function(btnEl, btnObj) {
                 var pubCopy = quickClone(pub);
                 btnEl.addClickListener(function(e) {
@@ -143,7 +144,8 @@ function Modal(content, options, overlay, customShow, customHide) {
                         classes += " nanoModalBtnPrimary";
                     }
                     classes += btnObj.classes ? " " + btnObj.classes : "";
-                    btnEl = El("button", classes);
+                    id = btnObj.id ? btnObj.id : "";
+                    btnEl = El("button", classes, id);
                     if (btnObj.handler === "hide") {
                         btnEl.addClickListener(pub.hide);
                     } else if (btnObj.handler) {
