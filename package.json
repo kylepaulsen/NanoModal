@@ -1,6 +1,6 @@
 {
   "name": "nanomodal-with-id",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A small, self-contained JavaScript modal library with some extra features",
   "homepage": "https://github.com/kylepaulsen/NanoModal",
   "author": {
