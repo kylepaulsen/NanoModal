@@ -1,3 +1,5 @@
+**I am no longer maintaining NanoModal. If you want a maintained modal library, try https://github.com/Nycto/PicoModal**
+
 # NanoModal [![Build Status](https://travis-ci.org/kylepaulsen/NanoModal.svg?branch=master)](https://travis-ci.org/kylepaulsen/NanoModal)
 
 NanoModal is yet another modal / dialog library written in a small amount of pure JavaScript. <a href="http://jsfiddle.net/aKL44/3/" target="_blank">See it in action!</a>
