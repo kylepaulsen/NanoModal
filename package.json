@@ -23,7 +23,7 @@
     "url": "https://github.com/kylepaulsen/NanoModal/issues"
   },
   "license": "MIT",
-  "main": "nanomodal.js",
+  "main": "src/main.js",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-qunit": "^0.5.2",
