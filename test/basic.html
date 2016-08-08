@@ -127,6 +127,7 @@
         var btn1Text = "button 1";
         var btn2Text = "button 2";
         var btn2NewClass = "myNewClass";
+        var btn2Id = "btn2Id";
         var nanoModalButtons;
 
         modal.setButtons([{
@@ -139,7 +140,8 @@
                 wasHandlerCalled = true;
                 handlerArg = arg;
             },
-            classes: btn2NewClass
+            classes: btn2NewClass,
+            id: btn2Id
         }]);
 
         nanoModalButtons = $(".nanoModalButtons .nanoModalBtn");
@@ -153,6 +155,9 @@
             "This button should have the nanoModalBtnPrimary class.");
         assert.ok($.inArray(btn2NewClass, nanoModalButtons[0].className.split(" ")),
             "This button should have the " + btn2NewClass + " class.");
+
+        assert.ok(nanoModalButtons[0].id === btn2Id,
+                "This button should have the " + btn2Id + " id.");
 
         modal.show();
 

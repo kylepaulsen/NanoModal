@@ -1,6 +1,6 @@
 {
-  "name": "nanomodal",
-  "version": "5.1.2",
+  "name": "nanomodal-with-id",
+  "version": "1.0.3",
   "description": "A small, self-contained JavaScript modal library with some extra features",
   "homepage": "https://github.com/kylepaulsen/NanoModal",
   "author": {
@@ -23,7 +23,7 @@
     "url": "https://github.com/kylepaulsen/NanoModal/issues"
   },
   "license": "MIT",
-  "main": "nanomodal.min.js",
+  "main": "nanomodal.js",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-qunit": "^0.5.2",

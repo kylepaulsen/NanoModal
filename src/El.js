@@ -1,11 +1,14 @@
 var ModalEvent = require("./ModalEvent");
 
-function El(tag, classNames) {
+function El(tag, classNames, id) {
     var doc = document;
     var el = (tag.nodeType || tag === window) ? tag : doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;
+    }
+    if(id && id.indexOf(" ") == -1) {
+        el.id = id;
     }
 
     var onShowEvent = ModalEvent();

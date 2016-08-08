@@ -2,12 +2,15 @@ var nanoModal;
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var ModalEvent = require("./ModalEvent");
 
-function El(tag, classNames) {
+function El(tag, classNames, id) {
     var doc = document;
     var el = (tag.nodeType || tag === window) ? tag : doc.createElement(tag);
     var eventHandlers = [];
     if (classNames) {
         el.className = classNames;
+    }
+    if(id && id.indexOf(" ") == -1) {
+        el.id = id;
     }
 
     var onShowEvent = ModalEvent();
@@ -250,6 +253,7 @@ function Modal(content, options, overlay, customShow, customHide) {
             var btnObj;
             var btnEl;
             var classes;
+            var id;
             var giveButtonCustomClickListener = function(btnEl, btnObj) {
                 var pubCopy = quickClone(pub);
                 btnEl.addClickListener(function(e) {
@@ -271,7 +275,8 @@ function Modal(content, options, overlay, customShow, customHide) {
                         classes += " nanoModalBtnPrimary";
                     }
                     classes += btnObj.classes ? " " + btnObj.classes : "";
-                    btnEl = El("button", classes);
+                    id = btnObj.id ? btnObj.id : "";
+                    btnEl = El("button", classes, id);
                     if (btnObj.handler === "hide") {
                         btnEl.addClickListener(pub.hide);
                     } else if (btnObj.handler) {
